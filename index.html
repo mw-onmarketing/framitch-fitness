@@ -550,7 +550,43 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
   animation: checkBurst 0.35s cubic-bezier(0.16,1,0.3,1);
 }
 
-.ex-footer { display: flex; gap: 8px; margin-top: 10px; }
+.ex-equip-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+.ex-equip-row input {
+  width: 60px;
+  padding: 6px 8px;
+  font-size: 13px;
+  text-align: center;
+  border-radius: var(--radius-xs);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--card-border);
+  color: var(--ink);
+}
+.ex-equip-row input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb),0.15);
+}
+.set-total {
+  font-size: 10px;
+  color: var(--ink-muted);
+  margin-left: 2px;
+  white-space: nowrap;
+}
+.ex-notes-badge {
+  display: inline-block;
+  font-size: 10px;
+  margin-left: 4px;
+  vertical-align: middle;
+  opacity: 0.7;
+}
+
+.ex-footer { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
 .ex-footer-btn {
   font-size: 11px;
   font-weight: 600;
@@ -2305,23 +2341,23 @@ const PLANS = {
     greeting: 'Hey Mitch!',
     greetingEmoji: '\uD83D\uDCAA',
     workouts: {
-      'Tag A (OK)': [
-        { name: 'Bankdrücken (LH)', target: '3x5', sets: 3, anchor: true, progType: 'strength', progReps: 5 },
-        { name: 'Rudern Kabel (breit)', target: '3x8-10', sets: 3 },
-        { name: 'Latziehen (breit/vorne)', target: '3x8-10', sets: 3 },
-        { name: 'Schulterdrücken', target: '2x6-8', sets: 2 },
-        { name: 'Seitheben', target: '2-3x12-20', sets: 3 },
-        { name: 'Trizeps Kabel', target: '2x10-15', sets: 2 },
-        { name: 'Bizeps (KH/Kabel)', target: '2x10-15', sets: 2 }
+      'Tag A (UK + Push)': [
+        { name: 'Kniebeuge (LH)', target: '3x5-6', sets: 3, anchor: true, progType: 'strength6', progReps: 6 },
+        { name: 'RDL (LH/KH)', target: '3x6-10', sets: 3 },
+        { name: 'Hip Thrust', target: '3x8-12', sets: 3 },
+        { name: 'Beinpresse', target: '3x8-12', sets: 3 },
+        { name: 'Wadenheben', target: '3x8-12', sets: 3 },
+        { name: 'Brustpresse/Schrägbank', target: '2x8-12', sets: 2 },
+        { name: 'Seitheben', target: '2-3x12-20', sets: 3 }
       ],
-      'Tag B (UK)': [
-        { name: 'Kniebeuge (Back Squat)', target: '3x5-6', sets: 3, anchor: true, progType: 'strength6', progReps: 6 },
-        { name: 'RDL (KH oder LH)', target: '2-3x6-8', sets: 3 },
-        { name: 'Beinpresse', target: '2-3x10-12', sets: 3 },
-        { name: 'Beinbeuger', target: '2x10-15', sets: 2 },
-        { name: 'Waden', target: '3x8-12', sets: 3 },
-        { name: 'Schrägbankdrücken', target: '2x6-8', sets: 2 },
-        { name: 'Latziehen/Rudern', target: '2x8-10', sets: 2 }
+      'Tag B (UK + Pull)': [
+        { name: 'Bankdrücken (LH)', target: '3x5', sets: 3, anchor: true, progType: 'strength', progReps: 5 },
+        { name: 'Rudern Kabel', target: '3x8-12', sets: 3 },
+        { name: 'Latziehen', target: '3x8-12', sets: 3 },
+        { name: 'Hack Squat/Beinpresse', target: '3x8-12', sets: 3 },
+        { name: 'Beinbeuger', target: '2-3x10-15', sets: 3 },
+        { name: 'Schulterdrücken', target: '2x8-12', sets: 2 },
+        { name: 'Bizeps/Trizeps', target: '2x10-15', sets: 2 }
       ]
     },
     warmups: {
@@ -2333,7 +2369,7 @@ const PLANS = {
         { kg: 80, reps: 1 },
         { kg: null, reps: 'Arbeit' }
       ],
-      'Kniebeuge (Back Squat)': [
+      'Kniebeuge (LH)': [
         { kg: 20, reps: '8-10' },
         { kg: 50, reps: 5 },
         { kg: 70, reps: 3 },
@@ -2394,32 +2430,23 @@ const PLANS = {
     greeting: 'Hey Fran!',
     greetingEmoji: '\u2728',
     workouts: {
-      'Einheit A (Quad/Push)': [
+      'Tag A (UK + Push)': [
+        { name: 'Kniebeuge (LH)', target: '3x8-12', sets: 3 },
+        { name: 'RDL (LH/KH)', target: '3x6-10', sets: 3 },
+        { name: 'Hip Thrust', target: '3x8-12', sets: 3 },
         { name: 'Beinpresse', target: '3x8-12', sets: 3 },
-        { name: 'Hip Thrust Maschine', target: '3x8-12', sets: 3 },
-        { name: 'Beinstrecker', target: '2x10-15', sets: 2 },
+        { name: 'Wadenheben', target: '3x8-12', sets: 3 },
+        { name: 'Brustpresse/Schrägbank', target: '2x8-12', sets: 2 },
+        { name: 'Seitheben', target: '2-3x12-20', sets: 3 }
+      ],
+      'Tag B (UK + Pull)': [
         { name: 'Brustpresse', target: '3x8-12', sets: 3 },
-        { name: 'Seitheben', target: '2x12-20', sets: 2 },
-        { name: 'Waden', target: '2-3x8-15', sets: 3 },
-        { name: 'Core (Plank/Crunch)', target: '2-3 Sätze', sets: 3 }
-      ],
-      'Einheit B (Ham/Pull)': [
-        { name: 'Hack Squat / Smith', target: '3x8-12', sets: 3 },
-        { name: 'Beinbeuger', target: '3x10-15', sets: 3 },
-        { name: 'Abduktor Maschine', target: '2x12-20', sets: 2 },
+        { name: 'Rudern Kabel', target: '3x8-12', sets: 3 },
         { name: 'Latziehen', target: '3x8-12', sets: 3 },
-        { name: 'Rudern', target: '3x8-12', sets: 3 },
-        { name: 'Schulterpresse', target: '2x8-12', sets: 2 },
-        { name: 'Bizeps', target: '2x10-15', sets: 2 }
-      ],
-      'Einheit C (Bonus)': [
-        { name: 'Ausfallschritte/Split Squat', target: '2-3x8-12/S', sets: 3 },
-        { name: 'Glute Bridge/Abduktor', target: '2-3x12-20', sets: 3 },
-        { name: 'Latziehen', target: '3x8-12', sets: 3 },
-        { name: 'Brustpresse/Fliegende', target: '2x10-15', sets: 2 },
-        { name: 'Seitheben', target: '3x12-20', sets: 3 },
-        { name: 'Trizeps', target: '2x10-15', sets: 2 },
-        { name: 'Core', target: '2 Sätze', sets: 2 }
+        { name: 'Hack Squat/Beinpresse', target: '3x8-12', sets: 3 },
+        { name: 'Beinbeuger', target: '2-3x10-15', sets: 3 },
+        { name: 'Schulterdrücken', target: '2x8-12', sets: 2 },
+        { name: 'Bizeps/Trizeps', target: '2x10-15', sets: 2 }
       ]
     },
     hinweise: [
@@ -2891,31 +2918,51 @@ function renderExercises() {
   let html = '';
 
   exercises.forEach((ex, ei) => {
+    const exNameSafe = ex.name.replace(/'/g, "\\'");
+    const equipKey = `equipweight_${ex.name}`;
+    const equipWeight = loadGlobal(equipKey) || '';
+    const notesKey = `exnotes_${ex.name}`;
+    const hasNotes = !!loadGlobal(notesKey);
+
     html += `<div class="exercise-card" style="animation-delay:${ei * 0.04}s;">
       <div class="ex-header">
-        <div class="ex-name">${ex.name}</div>
+        <div class="ex-name">${ex.name}${hasNotes ? '<span class="ex-notes-badge" title="Notizen vorhanden">\uD83D\uDCDD</span>' : ''}</div>
         ${ex.anchor ? '<div class="ex-anchor-tag">Anker</div>' : ''}
       </div>
-      <div class="ex-target">Ziel: ${ex.target} \u00B7 RIR 1-2${ex.anchor ? ' \u00B7 Pause 2,5-4 Min' : ' \u00B7 Pause 60-90s'}</div>`;
+      <div class="ex-target">Ziel: ${ex.target} \u00B7 RIR 1-2${ex.anchor ? ' \u00B7 Pause 2,5-4 Min' : ' \u00B7 Pause 60-90s'}</div>
+      <div class="ex-equip-row">
+        <span>\u2699\uFE0F Gerät:</span>
+        <input type="number" inputmode="decimal" placeholder="--" value="${equipWeight}" step="0.5"
+          onchange="saveEquipWeight('${exNameSafe}',this.value)"/>
+        <span>kg</span>
+      </div>`;
+
+    const eqW = parseFloat(equipWeight) || 0;
 
     for (let s = 0; s < ex.sets; s++) {
       const kgVal = session[`${ei}_${s}_kg`] || '';
       const repVal = session[`${ei}_${s}_reps`] || '';
       const done = session[`${ei}_${s}_done`] || false;
+      const addedKg = parseFloat(kgVal) || 0;
+      const totalKg = eqW > 0 && addedKg > 0 ? addedKg + eqW : 0;
+      const totalHtml = totalKg > 0 ? `<div class="set-total">${addedKg} + ${eqW} = ${totalKg} kg</div>` : '';
+
       html += `<div class="set-row">
         <div class="set-num">${s + 1}</div>
         <div class="set-inputs">
           <input type="number" inputmode="decimal" placeholder="kg" value="${kgVal}" step="0.5"
-            onchange="saveSetField('${sessionKey}',${ei},${s},'kg',this.value)"/>
+            onchange="saveSetField('${sessionKey}',${ei},${s},'kg',this.value)" data-ei="${ei}" data-si="${s}" data-type="kg"/>
           <input type="number" inputmode="numeric" placeholder="Wdh" value="${repVal}"
             onchange="saveSetField('${sessionKey}',${ei},${s},'reps',this.value)"/>
         </div>
         <button class="set-check ${done ? 'checked' : ''}" onclick="toggleSetDone('${sessionKey}',${ei},${s},this)">\u2713</button>
-      </div>`;
+      </div>
+      ${totalHtml}`;
     }
 
     html += `<div class="ex-footer">
-      <button class="ex-footer-btn" onclick="showExHistory('${ex.name.replace(/'/g, "\\'")}')">Verlauf</button>
+      <button class="ex-footer-btn" onclick="showExHistory('${exNameSafe}')">\uD83D\uDCDC Verlauf</button>
+      <button class="ex-footer-btn" onclick="showExNotes('${exNameSafe}')">\uD83D\uDCDD Notizen</button>
       <button class="ex-footer-btn" onclick="startTimer(${ex.anchor ? 180 : 90},'${ex.anchor ? 'Anker-Pause' : 'Pause'}')">\u23F1 Timer</button>
     </div></div>`;
   });
@@ -2968,6 +3015,50 @@ function checkProgression() {
   } else {
     el.classList.remove('show');
   }
+}
+
+// Helper to load/save per-user global keys (not date-scoped)
+function loadGlobal(k) {
+  try { const v = localStorage.getItem(key(k)); return v ? JSON.parse(v) : ''; } catch (e) { return ''; }
+}
+function saveGlobal(k, v) { localStorage.setItem(key(k), JSON.stringify(v)); }
+
+function saveEquipWeight(exName, val) {
+  const k = `equipweight_${exName}`;
+  if (val && parseFloat(val) > 0) {
+    saveGlobal(k, val);
+  } else {
+    localStorage.removeItem(key(k));
+  }
+  // Re-render to update total displays
+  renderExercises();
+}
+
+function showExNotes(exName) {
+  const notesKey = `exnotes_${exName}`;
+  const existing = loadGlobal(notesKey) || '';
+
+  const html = `<div class="modal-handle"></div>
+    <h3>\uD83D\uDCDD ${exName}</h3>
+    <div style="font-size:12px;color:var(--ink-muted);margin-bottom:10px;">Notizen zu dieser Übung (z.B. Grip, Sitzposition, Schmerzstellen...)</div>
+    <textarea id="exNotesTextarea" style="width:100%;min-height:120px;max-height:200px;padding:12px 14px;border-radius:var(--radius-sm);background:var(--card);border:1px solid var(--card-border);color:var(--ink);font-family:var(--font);font-size:14px;line-height:1.5;resize:vertical;outline:none;" placeholder="Notizen hier eingeben...">${escapeHtml(existing)}</textarea>
+    <button class="btn-primary" style="margin-top:12px;" onclick="saveExNotes('${exName.replace(/'/g, "\\'")}')">Speichern</button>`;
+
+  showModal(html);
+  setTimeout(() => document.getElementById('exNotesTextarea')?.focus(), 300);
+}
+
+function saveExNotes(exName) {
+  const text = document.getElementById('exNotesTextarea')?.value?.trim() || '';
+  const notesKey = `exnotes_${exName}`;
+  if (text) {
+    saveGlobal(notesKey, text);
+  } else {
+    localStorage.removeItem(key(notesKey));
+  }
+  closeModal();
+  toast('Notizen gespeichert!');
+  renderExercises();
 }
 
 function finishWorkout() {
