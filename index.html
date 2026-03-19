@@ -3481,73 +3481,85 @@ let scannerDetector = null;
 let scannerAnimFrame = null;
 
 function openBarcodeScanner() {
-  const hasBarcodeDetector = 'BarcodeDetector' in window;
-
-  if (!hasBarcodeDetector) {
-    // Fallback: manual barcode input
-    showModal(`
-      <div class="modal-handle"></div>
-      <h3>Barcode eingeben</h3>
-      <div style="font-size:13px;color:var(--ink-muted);margin-bottom:12px;">
-        Dein Browser unterstützt keinen Barcode-Scanner. Gib den Barcode manuell ein.
-      </div>
+  // Show modal with both options: camera scan + manual input
+  showModal(`
+    <div class="modal-handle"></div>
+    <h3>Barcode scannen</h3>
+    <div style="font-size:13px;color:var(--ink-muted);margin-bottom:16px;">
+      Fotografiere den Barcode oder gib die EAN-Nummer manuell ein.
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:16px;">
+      <button class="btn-primary" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;" onclick="scanBarcodePhoto()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 15.2a3.2 3.2 0 100-6.4 3.2 3.2 0 000 6.4z"/><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
+        Foto
+      </button>
+    </div>
+    <input type="file" id="barcodeCameraInput" accept="image/*" capture="environment" style="display:none;" onchange="handleBarcodePhoto(event)"/>
+    <div style="border-top:1px solid var(--line);padding-top:12px;margin-top:4px;">
+      <div style="font-size:12px;color:var(--ink-muted);margin-bottom:8px;">Oder manuell eingeben:</div>
       <div class="scanner-fallback">
         <input type="text" id="manualBarcodeInput" placeholder="z.B. 4015000960892" inputmode="numeric" style="max-width:100%;font-size:16px;letter-spacing:1px;text-align:center;"/>
       </div>
-      <button class="btn-primary" onclick="lookupManualBarcode()">Suchen</button>
-    `);
-    setTimeout(() => document.getElementById('manualBarcodeInput')?.focus(), 300);
-    return;
-  }
-
-  const overlay = document.getElementById('scannerOverlay');
-  overlay.classList.add('open');
-  document.getElementById('scannerHint').textContent = 'Halte den Barcode in den Rahmen';
-  startCameraForScanner();
+      <button class="btn-primary" onclick="lookupManualBarcode()" style="margin-top:8px;">Suchen</button>
+    </div>
+  `);
 }
 
-async function startCameraForScanner() {
-  try {
-    scannerStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
-    });
-
-    const video = document.getElementById('scannerVideo');
-    video.srcObject = scannerStream;
-    await video.play();
-
-    scannerDetector = new BarcodeDetector({ formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39'] });
-    scanBarcodeFrame();
-  } catch (err) {
-    document.getElementById('scannerHint').textContent = 'Kamera konnte nicht gestartet werden';
-    console.error('Camera error:', err);
-  }
+function scanBarcodePhoto() {
+  document.getElementById('barcodeCameraInput')?.click();
 }
 
-async function scanBarcodeFrame() {
-  const video = document.getElementById('scannerVideo');
-  if (!video || !scannerDetector || video.readyState < 2) {
-    scannerAnimFrame = requestAnimationFrame(scanBarcodeFrame);
-    return;
-  }
+async function handleBarcodePhoto(e) {
+  const file = e.target.files?.[0];
+  if (!file) return;
 
-  try {
-    const barcodes = await scannerDetector.detect(video);
-    if (barcodes.length > 0) {
-      const code = barcodes[0].rawValue;
-      if (code && code.length >= 8) {
-        // Success - vibrate and look up product
+  closeModal();
+  toast('Barcode wird erkannt...', 'info');
+
+  // Try BarcodeDetector if available
+  if ('BarcodeDetector' in window) {
+    try {
+      const bitmap = await createImageBitmap(file);
+      const detector = new BarcodeDetector({ formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39'] });
+      const barcodes = await detector.detect(bitmap);
+      if (barcodes.length > 0 && barcodes[0].rawValue?.length >= 8) {
         if (navigator.vibrate) navigator.vibrate(100);
-        closeBarcodeScanner();
-        lookupBarcode(code);
+        lookupBarcode(barcodes[0].rawValue);
         return;
       }
+    } catch (err) {
+      console.log('BarcodeDetector failed, trying fallback', err);
     }
-  } catch (err) {
-    // Detection error, keep scanning
   }
 
-  scannerAnimFrame = requestAnimationFrame(scanBarcodeFrame);
+  // Fallback: try reading the barcode number from the image using Claude
+  try {
+    const reader = new FileReader();
+    reader.onload = async function(ev) {
+      const dataUrl = ev.target.result;
+      try {
+        const resp = await fetch('/api/analyze-food', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: dataUrl, mode: 'barcode' }),
+        });
+        const data = await resp.json();
+        if (data.barcode && data.barcode.length >= 8) {
+          if (navigator.vibrate) navigator.vibrate(100);
+          lookupBarcode(data.barcode);
+        } else {
+          toast('Barcode konnte nicht erkannt werden. Bitte manuell eingeben.', 'error');
+          openBarcodeScanner();
+        }
+      } catch (err) {
+        toast('Fehler bei der Erkennung', 'error');
+        openBarcodeScanner();
+      }
+    };
+    reader.readAsDataURL(file);
+  } catch (err) {
+    toast('Fehler beim Lesen des Fotos', 'error');
+  }
 }
 
 function closeBarcodeScanner() {
