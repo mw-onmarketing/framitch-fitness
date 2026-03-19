@@ -3388,7 +3388,7 @@ async function searchFoodDatabase(query) {
   foodSearchAbort = new AbortController();
 
   try {
-    const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=15&fields=product_name,nutriments,image_front_small_url,brands,serving_size,code&lc=de&cc=de`;
+    const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=10&fields=product_name,nutriments,brands,serving_size,code&lc=de&cc=de`;
     const resp = await fetch(url, { signal: foodSearchAbort.signal });
     const data = await resp.json();
 
@@ -3398,25 +3398,24 @@ async function searchFoodDatabase(query) {
     }
 
     // Store results globally so onclick doesn't need inline JSON
-    window._foodSearchResults = data.products.map((p, i) => ({
+    window._foodSearchResults = data.products.map((p) => ({
       name: p.product_name || 'Unbekannt',
       brand: p.brands || '',
       kcal: Math.round(p.nutriments?.['energy-kcal_100g'] || p.nutriments?.['energy-kcal'] || 0),
       protein: Math.round(p.nutriments?.proteins_100g || 0),
       carbs: Math.round(p.nutriments?.carbohydrates_100g || 0),
       fat: Math.round(p.nutriments?.fat_100g || 0),
-      img: p.image_front_small_url || '',
+      img: '',
       serving: p.serving_size || '',
       code: p.code || ''
     }));
 
     resultsEl.innerHTML = window._foodSearchResults.map((item, i) => {
       return `<div class="food-search-item" onclick="selectSearchResult(window._foodSearchResults[${i}])">
-        ${item.img ? `<img class="food-search-item-img" src="${item.img}" alt="" onerror="this.style.display='none'"/>` : '<div class="food-search-item-img" style="display:flex;align-items:center;justify-content:center;font-size:20px;">&#x1F34E;</div>'}
-        <div class="food-search-item-info">
+        <div class="food-search-item-info" style="padding-left:0;">
           <div class="food-search-item-name">${escapeHtml(item.name)}</div>
           ${item.brand ? `<div class="food-search-item-brand">${escapeHtml(item.brand)}</div>` : ''}
-          <div class="food-search-item-macros">pro 100g: ${item.kcal} kcal, ${item.protein}g Protein</div>
+          <div class="food-search-item-macros">${item.kcal} kcal · ${item.protein}g P · ${item.carbs}g K · ${item.fat}g F <span style="opacity:0.5;">/ 100g</span></div>
         </div>
       </div>`;
     }).join('');
