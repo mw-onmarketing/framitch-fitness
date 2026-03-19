@@ -1224,14 +1224,6 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
   box-shadow: 0 8px 32px rgba(0,0,0,0.6);
 }
 .food-search-results.open { display: block; animation: fadeIn 0.2s ease both; }
-.food-search-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.3);
-  z-index: 499;
-  display: none;
-}
-.food-search-backdrop.open { display: block; }
 
 .food-search-status {
   padding: 16px;
@@ -1814,7 +1806,6 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
   </div>
 
   <!-- FOOD SEARCH OVERLAY -->
-  <div class="food-search-backdrop" id="foodSearchBackdrop" onclick="closeFoodSearch()"></div>
   <div class="food-search-results" id="foodSearchResults"></div>
 
   <!-- BOTTOM NAV -->
@@ -3351,20 +3342,27 @@ let foodSearchTimeout = null;
 let foodSearchAbort = null;
 
 function closeFoodSearch() {
-  closeFoodSearch();
-  document.getElementById('foodSearchBackdrop').classList.remove('open');
+  document.getElementById('foodSearchResults').classList.remove('open');
 }
 
 function openFoodSearchResults() {
   const input = document.getElementById('foodSearchInput');
   const resultsEl = document.getElementById('foodSearchResults');
-  const backdrop = document.getElementById('foodSearchBackdrop');
-  // Position results below the search input
   const rect = input.getBoundingClientRect();
   resultsEl.style.top = (rect.bottom + 4) + 'px';
   resultsEl.classList.add('open');
-  backdrop.classList.add('open');
 }
+
+// Close search when tapping outside
+document.addEventListener('click', function(e) {
+  const results = document.getElementById('foodSearchResults');
+  const input = document.getElementById('foodSearchInput');
+  if (results && results.classList.contains('open')) {
+    if (!results.contains(e.target) && e.target !== input) {
+      closeFoodSearch();
+    }
+  }
+});
 
 function onFoodSearchInput(query) {
   clearTimeout(foodSearchTimeout);
