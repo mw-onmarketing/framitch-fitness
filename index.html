@@ -1556,15 +1556,15 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
   <div class="profile-logo"><img src="logo.png" alt="Framitch Fitness"/></div>
   <div class="profile-subtitle">Wer trainiert heute?</div>
   <div class="profile-cards">
-    <button class="profile-card mitch animate-in-scale" onclick="selectProfile('mitch')">
-      <div class="profile-avatar"><img src="Mitch.png" alt="Mitch"/></div>
-      <div class="profile-card-name">Mitch</div>
-      <div class="profile-card-label">Cut / Kraft</div>
-    </button>
-    <button class="profile-card fran animate-in-scale stagger-2" onclick="selectProfile('fran')">
+    <button class="profile-card fran animate-in-scale" onclick="selectProfile('fran')">
       <div class="profile-avatar"><img src="Fran.png" alt="Fran"/></div>
       <div class="profile-card-name">Fran</div>
       <div class="profile-card-label">Lean Bulk</div>
+    </button>
+    <button class="profile-card mitch animate-in-scale stagger-2" onclick="selectProfile('mitch')">
+      <div class="profile-avatar"><img src="Mitch.png" alt="Mitch"/></div>
+      <div class="profile-card-name">Mitch</div>
+      <div class="profile-card-label">Cut / Kraft</div>
     </button>
   </div>
 </div>
@@ -2129,6 +2129,7 @@ function selectProfile(user) {
 function switchProfile() {
   document.getElementById('app').style.display = 'none';
   document.getElementById('profileScreen').style.display = 'flex';
+  localStorage.removeItem('ft_lastUser');
   currentUser = null;
 }
 
