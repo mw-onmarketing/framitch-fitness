@@ -1,4 +1,4 @@
-const CACHE_NAME = 'framitch-v6';
+const CACHE_NAME = 'framitch-v7';
 const ASSETS = [
   './',
   './index.html',

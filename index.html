@@ -242,7 +242,7 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
 .profile-card.fran .profile-avatar { background: linear-gradient(135deg, #581c87, #a855f7); border-color: rgba(168,85,247,0.4); }
 
 .header-avatar {
-  width: 34px; height: 34px;
+  width: 40px; height: 40px;
   border-radius: 50%;
   overflow: hidden;
   border: 2px solid rgba(var(--accent-rgb),0.4);
@@ -272,7 +272,8 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
   position: sticky;
   top: 0;
   z-index: 50;
-  padding: 12px 20px;
+  padding: 16px 20px;
+  padding-top: max(16px, env(safe-area-inset-top, 16px));
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -280,6 +281,7 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
   backdrop-filter: blur(20px) saturate(1.8);
   -webkit-backdrop-filter: blur(20px) saturate(1.8);
   border-bottom: 1px solid var(--line);
+  min-height: 56px;
 }
 
 .header-left { display: flex; align-items: center; gap: 10px; }
@@ -1243,6 +1245,17 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
 }
 .food-search-item:last-child { border-bottom: none; }
 .food-search-item:active { background: rgba(var(--accent-rgb),0.08); }
+.food-search-item { animation: slideInItem 0.2s ease both; }
+.food-search-item:nth-child(1) { animation-delay: 0s; }
+.food-search-item:nth-child(2) { animation-delay: 0.03s; }
+.food-search-item:nth-child(3) { animation-delay: 0.06s; }
+.food-search-item:nth-child(4) { animation-delay: 0.09s; }
+.food-search-item:nth-child(5) { animation-delay: 0.12s; }
+.food-search-item:nth-child(n+6) { animation-delay: 0.15s; }
+@keyframes slideInItem {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 .food-search-item-img {
   width: 44px; height: 44px;
   border-radius: var(--radius-xs);
@@ -1266,6 +1279,73 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
   font-size: 11px;
   color: var(--ink-secondary);
   margin-top: 1px;
+}
+.food-search-item-serving {
+  font-size: 10px;
+  color: var(--ink-muted);
+  margin-top: 2px;
+}
+
+/* ==================== PORTION PICKER ==================== */
+.portion-picker {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 0 8px;
+  margin-bottom: 8px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.portion-picker::-webkit-scrollbar { display: none; }
+.portion-btn {
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  color: var(--ink-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.portion-btn:active { transform: scale(0.95); }
+.portion-btn.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  box-shadow: 0 2px 8px rgba(var(--accent-rgb),0.3);
+}
+.portion-multiplier {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+.portion-mult-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  color: var(--ink);
+  font-size: 18px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.portion-mult-btn:active { transform: scale(0.9); background: rgba(var(--accent-rgb),0.15); }
+.portion-mult-label {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  min-width: 80px;
+  text-align: center;
 }
 
 /* ==================== BARCODE SCANNER ==================== */
@@ -3376,7 +3456,7 @@ function onFoodSearchInput(query) {
   openFoodSearchResults();
   resultsEl.innerHTML = '<div class="food-search-status">Suche...</div>';
 
-  foodSearchTimeout = setTimeout(() => searchFoodDatabase(query.trim()), 300);
+  foodSearchTimeout = setTimeout(() => searchFoodDatabase(query.trim()), 200);
 }
 
 async function searchFoodDatabase(query) {
@@ -3386,17 +3466,18 @@ async function searchFoodDatabase(query) {
   foodSearchAbort = new AbortController();
 
   try {
-    const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=10&fields=product_name,nutriments,brands,serving_size,code&lc=de&cc=de`;
+    const url = `/api/search-food?q=${encodeURIComponent(query)}`;
     const resp = await fetch(url, { signal: foodSearchAbort.signal });
     const data = await resp.json();
 
-    if (!data.products || data.products.length === 0) {
+    const products = data.hits || data.products || [];
+    if (products.length === 0) {
       resultsEl.innerHTML = '<div class="food-search-status">Keine Ergebnisse</div>';
       return;
     }
 
     // Store results globally so onclick doesn't need inline JSON
-    window._foodSearchResults = data.products.map((p) => ({
+    window._foodSearchResults = products.map((p) => ({
       name: p.product_name || 'Unbekannt',
       brand: p.brands || '',
       kcal: Math.round(p.nutriments?.['energy-kcal_100g'] || p.nutriments?.['energy-kcal'] || 0),
@@ -3405,15 +3486,18 @@ async function searchFoodDatabase(query) {
       fat: Math.round(p.nutriments?.fat_100g || 0),
       img: '',
       serving: p.serving_size || '',
+      servingQty: p.serving_quantity || 0,
       code: p.code || ''
     }));
 
     resultsEl.innerHTML = window._foodSearchResults.map((item, i) => {
+      const servingInfo = item.serving ? `<div class="food-search-item-serving">Portion: ${escapeHtml(item.serving)}</div>` : '';
       return `<div class="food-search-item" onclick="selectSearchResult(window._foodSearchResults[${i}])">
         <div class="food-search-item-info" style="padding-left:0;">
           <div class="food-search-item-name">${escapeHtml(item.name)}</div>
           ${item.brand ? `<div class="food-search-item-brand">${escapeHtml(item.brand)}</div>` : ''}
           <div class="food-search-item-macros">${item.kcal} kcal · ${item.protein}g P · ${item.carbs}g K · ${item.fat}g F <span style="opacity:0.5;">/ 100g</span></div>
+          ${servingInfo}
         </div>
       </div>`;
     }).join('');
@@ -3424,15 +3508,122 @@ async function searchFoodDatabase(query) {
 }
 
 function selectSearchResult(product) {
-  // Close search results
   closeFoodSearch();
   document.getElementById('foodSearchInput').value = '';
-
-  // Show portion modal
   showFoodPortionModal(product);
 }
 
+// Parse serving size string to grams, e.g. "22g", "1 Riegel (22g)", "250ml"
+function parseServingGrams(servingStr, servingQty) {
+  if (servingQty && servingQty > 0) return Math.round(servingQty);
+  if (!servingStr) return 0;
+  // Match patterns like "22g", "22 g", "(22g)", "22.5g"
+  const gMatch = servingStr.match(/([\d.,]+)\s*g/i);
+  if (gMatch) return Math.round(parseFloat(gMatch[1].replace(',', '.')));
+  // Match ml (approximate 1ml = 1g for drinks)
+  const mlMatch = servingStr.match(/([\d.,]+)\s*ml/i);
+  if (mlMatch) return Math.round(parseFloat(mlMatch[1].replace(',', '.')));
+  return 0;
+}
+
+// Get a readable serving label from the serving_size field
+function parseServingLabel(servingStr, parsedGrams) {
+  if (!servingStr) return null;
+  // If it's something like "1 Riegel (22g)" return "1 Riegel (22g)"
+  // If it's just "22g" return "1 Portion (22g)"
+  const cleaned = servingStr.trim();
+  if (/^\d+[\d.,]*\s*(g|ml)$/i.test(cleaned)) {
+    return `1 Portion (${parsedGrams}g)`;
+  }
+  // Already has a descriptive label
+  return cleaned + (cleaned.includes('g)') || cleaned.includes('ml)') ? '' : ` (${parsedGrams}g)`);
+}
+
+// Detect if product is drink-type
+function isDrinkProduct(name) {
+  const drinkWords = /milch|saft|juice|drink|cola|limo|wasser|tee|kaffee|smoothie|shake|nektar|sirup|brause|schorle|eistee|kakao|energy/i;
+  return drinkWords.test(name || '');
+}
+
+function buildPortionButtons(product) {
+  const buttons = [];
+  const servingGrams = parseServingGrams(product.serving, product.servingQty);
+
+  // Product-specific serving button
+  if (servingGrams > 0 && servingGrams !== 100) {
+    const label = parseServingLabel(product.serving, servingGrams);
+    if (label) buttons.push({ label, grams: servingGrams });
+  }
+
+  // Common gram portions
+  [100, 150, 200, 250].forEach(g => {
+    if (g !== servingGrams) buttons.push({ label: `${g}g`, grams: g });
+  });
+
+  // Drink-specific portions
+  if (isDrinkProduct(product.name)) {
+    if (servingGrams !== 200) buttons.push({ label: '1 Glas (200ml)', grams: 200 });
+    if (servingGrams !== 250) buttons.push({ label: '1 Becher (250ml)', grams: 250 });
+  }
+
+  // Deduplicate by grams value
+  const seen = new Set();
+  return buttons.filter(b => {
+    if (seen.has(b.grams)) return false;
+    seen.add(b.grams);
+    return true;
+  });
+}
+
+let _portionMultiplier = 1;
+let _portionBaseGrams = 100;
+
+function selectPortion(grams) {
+  _portionBaseGrams = grams;
+  _portionMultiplier = 1;
+  applyPortionSelection();
+}
+
+function changeMultiplier(delta) {
+  const next = _portionMultiplier + delta;
+  if (next < 1 || next > 20) return;
+  _portionMultiplier = next;
+  applyPortionSelection();
+}
+
+function applyPortionSelection() {
+  const totalGrams = _portionBaseGrams * _portionMultiplier;
+  const input = document.getElementById('foodPortionInput');
+  if (input) input.value = totalGrams;
+
+  // Update multiplier display
+  const multLabel = document.getElementById('portionMultLabel');
+  if (multLabel) {
+    multLabel.textContent = _portionMultiplier === 1
+      ? `${totalGrams}g`
+      : `${_portionMultiplier}x ${_portionBaseGrams}g = ${totalGrams}g`;
+  }
+
+  // Highlight active button
+  document.querySelectorAll('.portion-btn').forEach(btn => {
+    btn.classList.toggle('active', parseInt(btn.dataset.grams) === _portionBaseGrams);
+  });
+
+  updatePortionMacros();
+}
+
 function showFoodPortionModal(product) {
+  const portionBtns = buildPortionButtons(product);
+  const servingGrams = parseServingGrams(product.serving, product.servingQty);
+  const defaultGrams = servingGrams > 0 ? servingGrams : 100;
+
+  _portionBaseGrams = defaultGrams;
+  _portionMultiplier = 1;
+
+  const btnsHtml = portionBtns.map(b =>
+    `<button class="portion-btn${b.grams === defaultGrams ? ' active' : ''}" data-grams="${b.grams}" onclick="selectPortion(${b.grams})">${escapeHtml(b.label)}</button>`
+  ).join('');
+
   const html = `
     <div class="modal-handle"></div>
     <h3>${escapeHtml(product.name)}</h3>
@@ -3441,25 +3632,43 @@ function showFoodPortionModal(product) {
       Nährwerte pro 100g: ${product.kcal} kcal &middot; ${product.protein}g P &middot; ${product.carbs}g K &middot; ${product.fat}g F
       ${product.serving ? `<br>Portionsgröße: ${escapeHtml(product.serving)}` : ''}
     </div>
+    <div style="margin-bottom:4px;">
+      <label style="font-size:12px;font-weight:600;color:var(--ink-muted);display:block;margin-bottom:6px;">Portion wählen</label>
+      <div class="portion-picker">${btnsHtml}</div>
+    </div>
+    <div class="portion-multiplier">
+      <button class="portion-mult-btn" onclick="changeMultiplier(-1)">-</button>
+      <div class="portion-mult-label" id="portionMultLabel">${defaultGrams}g</div>
+      <button class="portion-mult-btn" onclick="changeMultiplier(1)">+</button>
+    </div>
     <div style="margin-bottom:12px;">
-      <label style="font-size:13px;font-weight:600;color:var(--ink-secondary);display:block;margin-bottom:6px;">Menge (g)</label>
-      <input type="number" id="foodPortionInput" value="100" min="1" inputmode="numeric" style="text-align:center;font-size:18px;font-weight:700;" oninput="updatePortionMacros()"/>
+      <label style="font-size:12px;font-weight:600;color:var(--ink-muted);display:block;margin-bottom:6px;">Oder manuell (g)</label>
+      <input type="number" id="foodPortionInput" value="${defaultGrams}" min="1" inputmode="numeric" style="text-align:center;font-size:18px;font-weight:700;" oninput="onManualPortionInput()"/>
     </div>
     <div class="food-macros-grid" id="foodPortionMacros">
-      <div class="food-macro-item"><div class="food-macro-val" id="portionKcal">${product.kcal}</div><div class="food-macro-label">kcal</div></div>
-      <div class="food-macro-item"><div class="food-macro-val" id="portionProtein">${product.protein}g</div><div class="food-macro-label">Protein</div></div>
-      <div class="food-macro-item"><div class="food-macro-val" id="portionCarbs">${product.carbs}g</div><div class="food-macro-label">Carbs</div></div>
-      <div class="food-macro-item"><div class="food-macro-val" id="portionFat">${product.fat}g</div><div class="food-macro-label">Fett</div></div>
+      <div class="food-macro-item"><div class="food-macro-val" id="portionKcal">${Math.round(product.kcal * defaultGrams / 100)}</div><div class="food-macro-label">kcal</div></div>
+      <div class="food-macro-item"><div class="food-macro-val" id="portionProtein">${Math.round(product.protein * defaultGrams / 100)}g</div><div class="food-macro-label">Protein</div></div>
+      <div class="food-macro-item"><div class="food-macro-val" id="portionCarbs">${Math.round(product.carbs * defaultGrams / 100)}g</div><div class="food-macro-label">Carbs</div></div>
+      <div class="food-macro-item"><div class="food-macro-val" id="portionFat">${Math.round(product.fat * defaultGrams / 100)}g</div><div class="food-macro-label">Fett</div></div>
     </div>
     <div style="display:flex;gap:10px;margin-top:12px;">
       <button class="btn-primary" style="flex:1;" onclick="saveFoodFromSearch()">Speichern</button>
       <button style="flex:0.6;padding:14px;border-radius:var(--radius);font-size:15px;font-weight:700;background:var(--card);border:1px solid var(--card-border);color:var(--ink);" onclick="closeModal()">Abbrechen</button>
     </div>`;
 
-  // Store product data for save
   window._pendingSearchProduct = product;
   showModal(html);
   setTimeout(() => document.getElementById('foodPortionInput')?.focus(), 300);
+}
+
+function onManualPortionInput() {
+  // When user manually types, deselect portion buttons and reset multiplier
+  _portionMultiplier = 1;
+  document.querySelectorAll('.portion-btn').forEach(btn => btn.classList.remove('active'));
+  const multLabel = document.getElementById('portionMultLabel');
+  const grams = parseFloat(document.getElementById('foodPortionInput')?.value) || 0;
+  if (multLabel) multLabel.textContent = `${grams}g`;
+  updatePortionMacros();
 }
 
 function updatePortionMacros() {
@@ -3500,6 +3709,7 @@ function saveFoodFromSearch() {
 
   window._pendingSearchProduct = null;
   closeModal();
+  document.getElementById('foodSearchInput').value = '';
   toast('Mahlzeit gespeichert!');
   renderFoodDaily();
 }
@@ -3651,6 +3861,7 @@ async function lookupBarcode(code) {
       fat: Math.round(p.nutriments?.fat_100g || 0),
       img: p.image_front_small_url || '',
       serving: p.serving_size || '',
+      servingQty: p.serving_quantity || 0,
       code: code
     };
 
