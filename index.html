@@ -1166,7 +1166,6 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
 .food-search-wrap {
   position: relative;
   margin: 8px 0;
-  z-index: 70;
 }
 .food-search-row {
   display: flex;
@@ -1212,19 +1211,27 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
 .food-barcode-btn:active { transform: scale(0.92); }
 
 .food-search-results {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: -18px; right: -18px;
+  position: fixed;
+  left: 16px; right: 16px;
+  top: 0;
   background: var(--bg-elevated);
   border: 1px solid var(--card-border);
   border-radius: var(--radius-sm);
-  max-height: 50vh;
+  max-height: 60vh;
   overflow-y: auto;
-  z-index: 200;
+  z-index: 500;
   display: none;
   box-shadow: 0 8px 32px rgba(0,0,0,0.6);
 }
 .food-search-results.open { display: block; animation: fadeIn 0.2s ease both; }
+.food-search-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 499;
+  display: none;
+}
+.food-search-backdrop.open { display: block; }
 
 .food-search-status {
   padding: 16px;
@@ -1673,7 +1680,6 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
             <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M2 4h2v16H2V4zm4 0h1v16H6V4zm3 0h2v16H9V4zm4 0h1v16h-1V4zm3 0h2v16h-2V4zm4 0h2v16h-2V4z"/></svg>
           </button>
         </div>
-        <div class="food-search-results" id="foodSearchResults"></div>
       </div>
     </div>
 
@@ -1806,6 +1812,10 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
     </div>
     <div class="scanner-hint" id="scannerHint">Halte den Barcode in den Rahmen</div>
   </div>
+
+  <!-- FOOD SEARCH OVERLAY -->
+  <div class="food-search-backdrop" id="foodSearchBackdrop" onclick="closeFoodSearch()"></div>
+  <div class="food-search-results" id="foodSearchResults"></div>
 
   <!-- BOTTOM NAV -->
   <nav class="bottom-nav">
@@ -3340,16 +3350,32 @@ function autoResizeChatInput(el) {
 let foodSearchTimeout = null;
 let foodSearchAbort = null;
 
+function closeFoodSearch() {
+  closeFoodSearch();
+  document.getElementById('foodSearchBackdrop').classList.remove('open');
+}
+
+function openFoodSearchResults() {
+  const input = document.getElementById('foodSearchInput');
+  const resultsEl = document.getElementById('foodSearchResults');
+  const backdrop = document.getElementById('foodSearchBackdrop');
+  // Position results below the search input
+  const rect = input.getBoundingClientRect();
+  resultsEl.style.top = (rect.bottom + 4) + 'px';
+  resultsEl.classList.add('open');
+  backdrop.classList.add('open');
+}
+
 function onFoodSearchInput(query) {
   clearTimeout(foodSearchTimeout);
   const resultsEl = document.getElementById('foodSearchResults');
 
   if (!query || query.trim().length < 2) {
-    resultsEl.classList.remove('open');
+    closeFoodSearch();
     return;
   }
 
-  resultsEl.classList.add('open');
+  openFoodSearchResults();
   resultsEl.innerHTML = '<div class="food-search-status">Suche...</div>';
 
   foodSearchTimeout = setTimeout(() => searchFoodDatabase(query.trim()), 300);
@@ -3402,7 +3428,7 @@ async function searchFoodDatabase(query) {
 
 function selectSearchResult(product) {
   // Close search results
-  document.getElementById('foodSearchResults').classList.remove('open');
+  closeFoodSearch();
   document.getElementById('foodSearchInput').value = '';
 
   // Show portion modal
