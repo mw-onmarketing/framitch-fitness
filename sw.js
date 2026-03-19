@@ -1,10 +1,12 @@
-const CACHE_NAME = 'framitch-v5';
+const CACHE_NAME = 'framitch-v6';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './Mitch.png',
   './Fran.png',
+  './logo.png',
+  './favicon.png',
   'https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js'
 ];
 

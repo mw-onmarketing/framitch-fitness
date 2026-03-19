@@ -4,6 +4,8 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
 <title>Framitch Fitness</title>
+<link rel="icon" type="image/png" href="favicon.png"/>
+<link rel="apple-touch-icon" href="logo.png"/>
 <link rel="manifest" href="manifest.json"/>
 <meta name="theme-color" content="#0a0a1a"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
@@ -147,9 +149,16 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
 }
 
 .profile-logo {
-  font-size: 48px;
+  width: 120px;
+  height: 120px;
   margin-bottom: 8px;
   animation: float 3s ease-in-out infinite;
+  filter: drop-shadow(0 4px 20px rgba(var(--accent-rgb),0.3));
+}
+.profile-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .profile-title {
@@ -1544,7 +1553,7 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
 
 <!-- PROFILE SCREEN -->
 <div id="profileScreen" class="profile-screen">
-  <div class="profile-logo">&#x1F4AA;</div>
+  <div class="profile-logo"><img src="logo.png" alt="Framitch Fitness"/></div>
   <div class="profile-title">Framitch Fitness</div>
   <div class="profile-subtitle">Wer trainiert heute?</div>
   <div class="profile-cards">
