@@ -1,4 +1,4 @@
-const CACHE_NAME = 'framitch-v4';
+const CACHE_NAME = 'framitch-v5';
 const ASSETS = [
   './',
   './index.html',
@@ -27,7 +27,7 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   // Skip caching for API calls and Firebase
   const url = e.request.url;
-  if (url.includes('/api/') || url.includes('firebaseio.com') || url.includes('googleapis.com/identitytoolkit') || e.request.method !== 'GET') {
+  if (url.includes('/api/') || url.includes('firebaseio.com') || url.includes('googleapis.com/identitytoolkit') || url.includes('openfoodfacts.org') || e.request.method !== 'GET') {
     return;
   }
   e.respondWith(

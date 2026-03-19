@@ -1153,6 +1153,227 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
   transition: background 0.2s;
 }
 
+/* ==================== FOOD SEARCH ==================== */
+.food-search-wrap {
+  position: relative;
+  margin: 8px 0;
+}
+.food-search-row {
+  display: flex;
+  gap: 8px;
+}
+.food-search-input {
+  flex: 1;
+  padding: 12px 14px 12px 40px;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  font-size: 15px;
+}
+.food-search-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb),0.15);
+}
+.food-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink-muted);
+  font-size: 16px;
+  pointer-events: none;
+  z-index: 1;
+}
+.food-barcode-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+  color: #fff;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.15s;
+  box-shadow: 0 4px 16px rgba(var(--accent-rgb),0.3);
+}
+.food-barcode-btn:active { transform: scale(0.92); }
+
+.food-search-results {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0; right: 0;
+  background: var(--bg-elevated);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  max-height: 320px;
+  overflow-y: auto;
+  z-index: 60;
+  display: none;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+.food-search-results.open { display: block; animation: fadeIn 0.2s ease both; }
+
+.food-search-status {
+  padding: 16px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+
+.food-search-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.food-search-item:last-child { border-bottom: none; }
+.food-search-item:active { background: rgba(var(--accent-rgb),0.08); }
+.food-search-item-img {
+  width: 44px; height: 44px;
+  border-radius: var(--radius-xs);
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--card);
+}
+.food-search-item-info { flex: 1; min-width: 0; }
+.food-search-item-name {
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.food-search-item-brand {
+  font-size: 11px;
+  color: var(--ink-muted);
+}
+.food-search-item-macros {
+  font-size: 11px;
+  color: var(--ink-secondary);
+  margin-top: 1px;
+}
+
+/* ==================== BARCODE SCANNER ==================== */
+.scanner-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  background: #000;
+  display: none;
+  flex-direction: column;
+}
+.scanner-overlay.open { display: flex; }
+
+.scanner-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: rgba(0,0,0,0.8);
+  z-index: 2;
+}
+.scanner-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+}
+.scanner-close-btn {
+  padding: 8px 16px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.scanner-video-wrap {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.scanner-video-wrap video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.scanner-frame {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.scanner-frame-inner {
+  width: 260px;
+  height: 160px;
+  position: relative;
+}
+.scanner-frame-inner::before,
+.scanner-frame-inner::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  height: 100%;
+}
+.scanner-corner {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-color: var(--accent);
+  border-style: solid;
+  border-width: 0;
+}
+.scanner-corner.tl { top: 0; left: 0; border-top-width: 3px; border-left-width: 3px; border-radius: 4px 0 0 0; }
+.scanner-corner.tr { top: 0; right: 0; border-top-width: 3px; border-right-width: 3px; border-radius: 0 4px 0 0; }
+.scanner-corner.bl { bottom: 0; left: 0; border-bottom-width: 3px; border-left-width: 3px; border-radius: 0 0 0 4px; }
+.scanner-corner.br { bottom: 0; right: 0; border-bottom-width: 3px; border-right-width: 3px; border-radius: 0 0 4px 0; }
+
+@keyframes scanLine {
+  0% { top: 0; }
+  50% { top: calc(100% - 2px); }
+  100% { top: 0; }
+}
+.scanner-line {
+  position: absolute;
+  left: 4px; right: 4px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  box-shadow: 0 0 8px var(--accent-glow);
+  animation: scanLine 2.5s ease-in-out infinite;
+}
+
+.scanner-hint {
+  padding: 16px;
+  text-align: center;
+  font-size: 13px;
+  color: rgba(255,255,255,0.6);
+  background: rgba(0,0,0,0.8);
+  z-index: 2;
+}
+
+.scanner-fallback {
+  padding: 24px 16px;
+  text-align: center;
+}
+.scanner-fallback input {
+  max-width: 280px;
+  margin: 12px auto;
+  text-align: center;
+  font-size: 18px;
+  letter-spacing: 2px;
+}
+
 /* ==================== CHAT ==================== */
 .chat-container {
   display: flex;
@@ -1392,7 +1613,7 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
     <div id="warmupSection"></div>
     <div id="workoutExercises"></div>
     <div class="progression-hint" id="progressionHint"></div>
-    <button class="btn-primary" id="finishBtn" onclick="finishWorkout()">Training abschliessen</button>
+    <button class="btn-primary" id="finishBtn" onclick="finishWorkout()">Training abschließen</button>
     <div class="section-label">Letzte Einheiten</div>
     <div class="glass-card">
       <div id="workoutHistory"></div>
@@ -1420,18 +1641,37 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
     </div>
     <div class="glass-card animate-in stagger-2">
       <div class="glass-card-header">
-        <div class="glass-card-title">Eintraege</div>
+        <div class="glass-card-title">Einträge</div>
       </div>
       <div id="weightList" style="max-height:240px;overflow-y:auto;"></div>
     </div>
   </div>
 
-  <!-- ERNAEHRUNG -->
+  <!-- ERNÄHRUNG -->
   <div id="pageNutrition" class="page">
-    <!-- Food Tracker -->
+    <!-- Food Search + Barcode -->
     <div class="glass-card animate-in">
       <div class="glass-card-header">
-        <div class="glass-card-title">Food Tracker</div>
+        <div class="glass-card-title">Lebensmittel suchen</div>
+      </div>
+      <div class="food-search-wrap">
+        <div class="food-search-row">
+          <div style="position:relative;flex:1;">
+            <div class="food-search-icon">&#x1F50D;</div>
+            <input type="text" class="food-search-input" id="foodSearchInput" placeholder="Skyr, Haferflocken, Reis..." autocomplete="off" oninput="onFoodSearchInput(this.value)"/>
+          </div>
+          <button class="food-barcode-btn" onclick="openBarcodeScanner()" title="Barcode scannen">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M2 4h2v16H2V4zm4 0h1v16H6V4zm3 0h2v16H9V4zm4 0h1v16h-1V4zm3 0h2v16h-2V4zm4 0h2v16h-2V4z"/></svg>
+          </button>
+        </div>
+        <div class="food-search-results" id="foodSearchResults"></div>
+      </div>
+    </div>
+
+    <!-- Food Tracker (Camera/Gallery) -->
+    <div class="glass-card animate-in stagger-1">
+      <div class="glass-card-header">
+        <div class="glass-card-title">Foto-Tracker</div>
       </div>
       <div class="food-tracker-actions">
         <button class="food-tracker-btn" onclick="captureFood('camera')">
@@ -1450,7 +1690,7 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
     </div>
 
     <!-- Daily Summary -->
-    <div class="glass-card animate-in stagger-1">
+    <div class="glass-card animate-in stagger-2">
       <div class="glass-card-header">
         <div class="glass-card-title">Heute</div>
         <div style="font-size:11px;color:var(--ink-muted);" id="foodDateLabel"></div>
@@ -1460,19 +1700,19 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
     </div>
 
     <!-- Existing macro goals -->
-    <div class="glass-card animate-in stagger-2">
+    <div class="glass-card animate-in stagger-3">
       <div class="glass-card-header">
-        <div class="glass-card-title">Taegliche Ziele</div>
+        <div class="glass-card-title">Tägliche Ziele</div>
       </div>
       <div id="macroTargets"></div>
     </div>
-    <div class="glass-card animate-in stagger-3">
+    <div class="glass-card animate-in stagger-4">
       <div class="glass-card-header">
         <div class="glass-card-title">Beispiel-Tag</div>
       </div>
       <div id="mealExamples"></div>
     </div>
-    <div class="glass-card animate-in stagger-4" id="proteinSourcesCard" style="display:none;">
+    <div class="glass-card animate-in stagger-5" id="proteinSourcesCard" style="display:none;">
       <div class="glass-card-header">
         <div class="glass-card-title">Top Protein-Quellen</div>
       </div>
@@ -1532,9 +1772,30 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
         <input type="file" id="importFile" accept=".json" onchange="importData(event)"/>
       </div>
       <div class="setting-section">
-        <button class="btn-danger" onclick="showConfirm('Daten loeschen','Alle Daten fuer dieses Profil werden unwiderruflich geloescht.',clearData)">Alle Daten loeschen</button>
+        <button class="btn-danger" onclick="showConfirm('Daten löschen','Alle Daten für dieses Profil werden unwiderruflich gelöscht.',clearData)">Alle Daten löschen</button>
       </div>
     </div>
+  </div>
+
+  <!-- BARCODE SCANNER OVERLAY -->
+  <div class="scanner-overlay" id="scannerOverlay">
+    <div class="scanner-header">
+      <div class="scanner-title">Barcode scannen</div>
+      <button class="scanner-close-btn" onclick="closeBarcodeScanner()">Schließen</button>
+    </div>
+    <div class="scanner-video-wrap" id="scannerVideoWrap">
+      <video id="scannerVideo" autoplay playsinline muted></video>
+      <div class="scanner-frame">
+        <div class="scanner-frame-inner">
+          <div class="scanner-corner tl"></div>
+          <div class="scanner-corner tr"></div>
+          <div class="scanner-corner bl"></div>
+          <div class="scanner-corner br"></div>
+          <div class="scanner-line"></div>
+        </div>
+      </div>
+    </div>
+    <div class="scanner-hint" id="scannerHint">Halte den Barcode in den Rahmen</div>
   </div>
 
   <!-- BOTTOM NAV -->
@@ -1583,10 +1844,10 @@ const PLANS = {
     greetingEmoji: '\uD83D\uDCAA',
     workouts: {
       'Tag A (OK)': [
-        { name: 'Bankdruecken (LH)', target: '3x5', sets: 3, anchor: true, progType: 'strength', progReps: 5 },
+        { name: 'Bankdrücken (LH)', target: '3x5', sets: 3, anchor: true, progType: 'strength', progReps: 5 },
         { name: 'Rudern Kabel (breit)', target: '3x8-10', sets: 3 },
         { name: 'Latziehen (breit/vorne)', target: '3x8-10', sets: 3 },
-        { name: 'Schulterdruecken', target: '2x6-8', sets: 2 },
+        { name: 'Schulterdrücken', target: '2x6-8', sets: 2 },
         { name: 'Seitheben', target: '2-3x12-20', sets: 3 },
         { name: 'Trizeps Kabel', target: '2x10-15', sets: 2 },
         { name: 'Bizeps (KH/Kabel)', target: '2x10-15', sets: 2 }
@@ -1597,12 +1858,12 @@ const PLANS = {
         { name: 'Beinpresse', target: '2-3x10-12', sets: 3 },
         { name: 'Beinbeuger', target: '2x10-15', sets: 2 },
         { name: 'Waden', target: '3x8-12', sets: 3 },
-        { name: 'Schraegbankdruecken', target: '2x6-8', sets: 2 },
+        { name: 'Schrägbankdrücken', target: '2x6-8', sets: 2 },
         { name: 'Latziehen/Rudern', target: '2x8-10', sets: 2 }
       ]
     },
     warmups: {
-      'Bankdruecken (LH)': [
+      'Bankdrücken (LH)': [
         { kg: 20, reps: 10 },
         { kg: 40, reps: 5 },
         { kg: 60, reps: 3 },
@@ -1620,7 +1881,7 @@ const PLANS = {
       ]
     },
     progressionWave: [
-      { exercise: 'Bankdruecken', weeks: [
+      { exercise: 'Bankdrücken', weeks: [
         { w: 1, kg: 87.5, reps: '3x5', note: 'Start' },
         { w: 2, kg: 87.5, reps: '3x5', note: 'Sichern' },
         { w: 3, kg: 90, reps: '3x5', note: 'Steigern' },
@@ -1638,11 +1899,11 @@ const PLANS = {
       { icon: '\uD83E\uDD69', text: 'Protein 183g/Tag' },
       { icon: '\uD83D\uDCA4', text: 'Schlaf = Supplement #1' },
       { icon: '\uD83D\uDCAA', text: 'Kraft halten = Erfolg im Cut' },
-      { icon: '\uD83D\uDD27', text: 'Defizit anpassen > Plan aendern' }
+      { icon: '\uD83D\uDD27', text: 'Defizit anpassen > Plan ändern' }
     ],
     checklist: {
       vorher: ['Mahlzeit 1-2h vorher (30-60g Carbs)', 'Wasser (0.5L)', 'Warmup: 5 Min Cardio + Gelenke'],
-      waehrend: ['Wasser trinken (kleine Schlucke)', 'Saetze loggen', 'Pausenzeiten einhalten'],
+      waehrend: ['Wasser trinken (kleine Schlucke)', 'Sätze loggen', 'Pausenzeiten einhalten'],
       nachher: ['Post-Workout Meal (50g Protein)', 'Dehnen/Lockern', 'Schlaf planen (7-8h)']
     },
     macros: { kcal: 1974, protein: 183, carbs: 130, fat: 74 },
@@ -1659,12 +1920,12 @@ const PLANS = {
     ],
     meals: [
       { name: 'Pre-Workout', desc: 'Banane + Skyr oder Reiswaffeln + Whey (30-60g Carbs)', kcal: '~200', protein: '~15g' },
-      { name: 'Post-Workout', desc: 'Protein-Meal: Haehnchen/Fisch/Tofu + Reis/Kartoffeln + Gemuese', kcal: '~550', protein: '~50g' },
-      { name: 'Mittag/Abend', desc: 'Mageres Protein + komplexe Carbs + Gemuese', kcal: '~500', protein: '~45g' },
-      { name: 'Snacks', desc: 'Quark/Skyr, Proteinriegel, Nuesse (Protein-Ziel auffuellen)', kcal: '~400', protein: '~40g' }
+      { name: 'Post-Workout', desc: 'Protein-Meal: Hähnchen/Fisch/Tofu + Reis/Kartoffeln + Gemüse', kcal: '~550', protein: '~50g' },
+      { name: 'Mittag/Abend', desc: 'Mageres Protein + komplexe Carbs + Gemüse', kcal: '~500', protein: '~45g' },
+      { name: 'Snacks', desc: 'Quark/Skyr, Proteinriegel, Nüsse (Protein-Ziel auffüllen)', kcal: '~400', protein: '~40g' }
     ],
-    adjustRules: '<b>Gewicht stagniert 2 Wochen:</b> -150 bis -250 kcal oder +1.000 Schritte/Tag.<br><br><b>Kraft faellt dauerhaft:</b> +150-250 kcal (Defizit kleiner).<br><br><b>Zu schnell (&gt;0,7 kg/Woche):</b> +150-250 kcal.<br><br><b>Deload:</b> Wenn 2x hintereinander deutlich schlechter: -5% Gewicht fuer 1 Woche.',
-    progressionAccessory: 'Compounds: obere Wdh-Grenze in allen Saetzen erreicht = +2,5 kg.\nIsos: erst Wdh steigern (12 -> 15 -> 18), dann Gewicht hoch. RIR 0-1 okay.'
+    adjustRules: '<b>Gewicht stagniert 2 Wochen:</b> -150 bis -250 kcal oder +1.000 Schritte/Tag.<br><br><b>Kraft fällt dauerhaft:</b> +150-250 kcal (Defizit kleiner).<br><br><b>Zu schnell (&gt;0,7 kg/Woche):</b> +150-250 kcal.<br><br><b>Deload:</b> Wenn 2x hintereinander deutlich schlechter: -5% Gewicht für 1 Woche.',
+    progressionAccessory: 'Compounds: obere Wdh-Grenze in allen Sätzen erreicht = +2,5 kg.\nIsos: erst Wdh steigern (12 -> 15 -> 18), dann Gewicht hoch. RIR 0-1 okay.'
   },
   fran: {
     name: 'Fran',
@@ -1678,7 +1939,7 @@ const PLANS = {
         { name: 'Brustpresse', target: '3x8-12', sets: 3 },
         { name: 'Seitheben', target: '2x12-20', sets: 2 },
         { name: 'Waden', target: '2-3x8-15', sets: 3 },
-        { name: 'Core (Plank/Crunch)', target: '2-3 Saetze', sets: 3 }
+        { name: 'Core (Plank/Crunch)', target: '2-3 Sätze', sets: 3 }
       ],
       'Einheit B (Ham/Pull)': [
         { name: 'Hack Squat / Smith', target: '3x8-12', sets: 3 },
@@ -1696,18 +1957,18 @@ const PLANS = {
         { name: 'Brustpresse/Fliegende', target: '2x10-15', sets: 2 },
         { name: 'Seitheben', target: '3x12-20', sets: 3 },
         { name: 'Trizeps', target: '2x10-15', sets: 2 },
-        { name: 'Core', target: '2 Saetze', sets: 2 }
+        { name: 'Core', target: '2 Sätze', sets: 2 }
       ]
     },
     hinweise: [
       { icon: '\uD83D\uDC8A', text: 'Methylphenidat: Training zeitlich gut legen' },
-      { icon: '\u23F1\uFE0F', text: 'Kondition: Laengere Pausen sind normal und okay' },
-      { icon: '\uD83C\uDFAF', text: '80% Konsistenz > 100% fuer 2 Wochen' },
-      { icon: '\u2696\uFE0F', text: 'Gewicht 2-3x/Woche morgens nuechtern wiegen' }
+      { icon: '\u23F1\uFE0F', text: 'Kondition: Längere Pausen sind normal und okay' },
+      { icon: '\uD83C\uDFAF', text: '80% Konsistenz > 100% für 2 Wochen' },
+      { icon: '\u2696\uFE0F', text: 'Gewicht 2-3x/Woche morgens nüchtern wiegen' }
     ],
     checklist: {
-      vorher: ['Leichter Snack 1-1.5h vorher', 'Wasser (0.3-0.5L)', 'Gelenke aufwaermen'],
-      waehrend: ['Wasser trinken', 'Saetze loggen', 'Laengere Pausen sind okay!'],
+      vorher: ['Leichter Snack 1-1.5h vorher', 'Wasser (0.3-0.5L)', 'Gelenke aufwärmen'],
+      waehrend: ['Wasser trinken', 'Sätze loggen', 'Längere Pausen sind okay!'],
       nachher: ['Protein-Snack/Shake', 'Dehnen', 'Erfolg feiern!']
     },
     macros: { kcal: 1850, protein: 110, carbs: null, fat: 60 },
@@ -1720,21 +1981,21 @@ const PLANS = {
       { name: 'Whey-Shake', dose: '1 Shake (25-30 g Protein)' }
     ],
     meals: [
-      { name: 'Fruehstueck', desc: '3 Knaecke + koerniger Frischkaese + 1/2 Avocado', kcal: '~420', protein: '~20g' },
+      { name: 'Frühstück', desc: '3 Knäcke + körniger Frischkäse + 1/2 Avocado', kcal: '~420', protein: '~20g' },
       { name: 'Snack/Shake', desc: 'Whey (30g) in 300ml Milch/Haferdrink', kcal: '~250', protein: '~30g' },
-      { name: 'Mittag', desc: 'Nudeln/Kartoffeln/Reis + Gemuese + Tofu/Linsen/Kaese', kcal: '~550', protein: '~25g' },
+      { name: 'Mittag', desc: 'Nudeln/Kartoffeln/Reis + Gemüse + Tofu/Linsen/Käse', kcal: '~550', protein: '~25g' },
       { name: 'Nachmittag', desc: '200g Skyr + Beeren/Banane + 1 EL Honig', kcal: '~230', protein: '~22g' },
-      { name: 'Abendessen', desc: 'Proteinbrot + Frischkaese oder Tortellini + Gemuese', kcal: '~400', protein: '~20g' }
+      { name: 'Abendessen', desc: 'Proteinbrot + Frischkäse oder Tortellini + Gemüse', kcal: '~400', protein: '~20g' }
     ],
     proteinSources: [
-      'Skyr/Magerquark (~10g/100g)', 'Koerniger Frischkaese (~12g/100g)',
-      'Whey-Shake (~25g/Portion)', 'Tofu/Raeuchertofu (~15g/100g)',
+      'Skyr/Magerquark (~10g/100g)', 'Körniger Frischkäse (~12g/100g)',
+      'Whey-Shake (~25g/Portion)', 'Tofu/Räuchertofu (~15g/100g)',
       'Seitan (~25g/100g)', 'Linsen/Kichererbsen (~8-9g/100g gek.)',
       'Eier (~13g/2 St.)', 'Proteinbrot/-wraps (~10-20g)',
-      'Edamame (~11g/100g)', 'Huettenkaese (~11g/100g)'
+      'Edamame (~11g/100g)', 'Hüttenkäse (~11g/100g)'
     ],
-    adjustRules: '<b>Gewicht steigt nicht (2 Wochen):</b> +100 kcal/Tag.<br><br><b>Zu schnell (&gt;0,5 kg/Woche):</b> -100 kcal/Tag.<br><br><b>Rebound-Muedigkeit vorm Training:</b> 30-60g Carbs + leicht Koffein 30 Min vorher.<br><br><b>Training fuehlt sich "tot" an:</b> Schlaf/Stress checken, ggf. Deload.',
-    progressionAccessory: 'Isos: erst Wdh steigern (z.B. 10 -> 12 -> 15), dann Gewicht hoch. RIR 1-2.\nCompounds: obere Wdh-Grenze in allen Saetzen = +2,5 kg naechstes Mal.'
+    adjustRules: '<b>Gewicht steigt nicht (2 Wochen):</b> +100 kcal/Tag.<br><br><b>Zu schnell (&gt;0,5 kg/Woche):</b> -100 kcal/Tag.<br><br><b>Rebound-Müdigkeit vorm Training:</b> 30-60g Carbs + leicht Koffein 30 Min vorher.<br><br><b>Training fühlt sich "tot" an:</b> Schlaf/Stress checken, ggf. Deload.',
+    progressionAccessory: 'Isos: erst Wdh steigern (z.B. 10 -> 12 -> 15), dann Gewicht hoch. RIR 1-2.\nCompounds: obere Wdh-Grenze in allen Sätzen = +2,5 kg nächstes Mal.'
   }
 };
 
@@ -1899,7 +2160,7 @@ function init() {
 function updateHeaderDate() {
   const now = new Date();
   const days = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
-  const months = ['Januar', 'Februar', 'Maerz', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+  const months = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
   document.getElementById('headerDate').textContent = `${days[now.getDay()]}, ${now.getDate()}. ${months[now.getMonth()]}`;
 }
 
@@ -1915,7 +2176,7 @@ function showPage(name) {
 
   const titles = {
     Dashboard: 'Dashboard', Training: 'Training', Weight: 'Gewicht',
-    Nutrition: 'Ernaehrung', Supps: 'Supplements', Chat: 'Chat', Settings: 'Mehr'
+    Nutrition: 'Ernährung', Supps: 'Supplements', Chat: 'Chat', Settings: 'Mehr'
   };
   document.getElementById('pageTitle').textContent = titles[name] || name;
 
@@ -2055,7 +2316,7 @@ function promptSteps() {
 
 function saveSteps() {
   const val = parseInt(document.getElementById('stepsInput')?.value);
-  if (isNaN(val) || val < 0) { toast('Bitte gueltige Schrittzahl eingeben', 'error'); return; }
+  if (isNaN(val) || val < 0) { toast('Bitte gültige Schrittzahl eingeben', 'error'); return; }
   save('steps_' + today(), val);
   closeModal();
   toast('Schritte gespeichert!');
@@ -2143,7 +2404,7 @@ function renderWarmup() {
     <div class="warmup-title">Warmup: ${anchorEx.name}</div>`;
   wu.forEach((step, i) => {
     if (step.kg === null) {
-      html += `<div class="warmup-step"><div class="warmup-step-badge" style="background:var(--green);"></div><strong style="color:var(--green);">Arbeitssaetze</strong></div>`;
+      html += `<div class="warmup-step"><div class="warmup-step-badge" style="background:var(--green);"></div><strong style="color:var(--green);">Arbeitssätze</strong></div>`;
     } else {
       html += `<div class="warmup-step">
         <div class="warmup-step-badge"></div>
@@ -2229,7 +2490,7 @@ function checkProgression() {
       if (reps < ex.progReps) allHitTarget = false;
     }
     if (allDone && allHitTarget) {
-      hints.push(`<strong>${ex.name}:</strong> Alle Saetze geschafft! Naechstes Mal <strong>+2,5 kg</strong>!`);
+      hints.push(`<strong>${ex.name}:</strong> Alle Sätze geschafft! Nächstes Mal <strong>+2,5 kg</strong>!`);
     }
   });
 
@@ -2259,9 +2520,9 @@ function finishWorkout() {
     if (exSets.length) sets.push({ name: ex.name, sets: exSets });
   });
 
-  if (!sets.length) { toast('Trag zuerst deine Saetze ein!', 'error'); return; }
+  if (!sets.length) { toast('Trag zuerst deine Sätze ein!', 'error'); return; }
 
-  showConfirm('Training abschliessen?', `${sets.length} Uebungen werden gespeichert.`, () => {
+  showConfirm('Training abschließen?', `${sets.length} Übungen werden gespeichert.`, () => {
     const workouts = load('workouts', []);
     workouts.push({ date: today(), workout: selectedWorkout, exercises: sets });
     save('workouts', workouts);
@@ -2298,7 +2559,7 @@ function showExHistory(name) {
   const hist = load('exhist_' + name, []);
   let html = `<div class="modal-handle"></div><h3>${name}</h3>`;
   if (!hist.length) {
-    html += '<div class="empty-state"><div class="empty-state-text">Noch keine Eintraege</div></div>';
+    html += '<div class="empty-state"><div class="empty-state-text">Noch keine Einträge</div></div>';
   } else {
     // Mini progression chart
     if (hist.length >= 2) {
@@ -2364,7 +2625,7 @@ function renderWeight() {
 function addWeight() {
   const input = document.getElementById('weightInput');
   const val = parseFloat(input.value);
-  if (isNaN(val) || val < 30 || val > 300) { toast('Bitte gueltiges Gewicht eingeben', 'error'); return; }
+  if (isNaN(val) || val < 30 || val > 300) { toast('Bitte gültiges Gewicht eingeben', 'error'); return; }
   const weights = load('weights', []);
   const idx = weights.findIndex(w => w.date === today());
   if (idx >= 0) weights.splice(idx, 1);
@@ -2463,7 +2724,7 @@ function renderWeightChart(weights) {
 
 function renderWeightList(weights) {
   const el = document.getElementById('weightList');
-  if (!weights.length) { el.innerHTML = '<div class="empty-state"><div class="empty-state-text">Noch keine Eintraege</div></div>'; return; }
+  if (!weights.length) { el.innerHTML = '<div class="empty-state"><div class="empty-state-text">Noch keine Einträge</div></div>'; return; }
   let html = '';
   weights.slice().reverse().slice(0, 25).forEach(w => {
     html += `<div class="weight-item">
@@ -2476,11 +2737,11 @@ function renderWeightList(weights) {
 }
 
 function deleteWeight(date) {
-  showConfirm('Eintrag loeschen?', `${formatDate(date)} wird entfernt.`, () => {
+  showConfirm('Eintrag löschen?', `${formatDate(date)} wird entfernt.`, () => {
     let weights = load('weights', []);
     weights = weights.filter(w => w.date !== date);
     save('weights', weights);
-    toast('Eintrag geloescht');
+    toast('Eintrag gelöscht');
     renderWeight();
   });
 }
@@ -2597,7 +2858,7 @@ function renderSettings() {
   // Training Checklist
   if (p.checklist) {
     let html = '<div class="glass-card animate-in stagger-1"><div class="glass-card-header"><div class="glass-card-title">Training Checkliste</div></div>';
-    const groups = { vorher: 'Vorher', waehrend: 'Waehrend', nachher: 'Nachher' };
+    const groups = { vorher: 'Vorher', waehrend: 'Während', nachher: 'Nachher' };
     Object.entries(groups).forEach(([key, label]) => {
       if (p.checklist[key]) {
         html += `<div class="checklist-group"><div class="checklist-title">${label}</div>`;
@@ -2618,7 +2879,7 @@ function renderSettings() {
     let html = '<div class="glass-card animate-in stagger-1"><div class="glass-card-header"><div class="glass-card-title">4-Wochen Progressionswelle</div></div>';
     p.progressionWave.forEach(pw => {
       html += `<div style="font-weight:700;font-size:14px;margin:10px 0 6px;">${pw.exercise}</div>
-      <table class="wave-table"><tr><th>Woche</th><th>Gewicht</th><th>Saetze</th><th>Notiz</th></tr>`;
+      <table class="wave-table"><tr><th>Woche</th><th>Gewicht</th><th>Sätze</th><th>Notiz</th></tr>`;
       pw.weeks.forEach(w => {
         html += `<tr><td>W${w.w}</td><td>${w.kg} kg</td><td>${w.reps}</td><td style="color:var(--ink-muted);">${w.note}</td></tr>`;
       });
@@ -2633,7 +2894,7 @@ function renderSettings() {
   // Progression Accessory
   if (p.progressionAccessory) {
     let existing = document.getElementById('progressionSection').innerHTML;
-    existing += `<div class="glass-card animate-in stagger-2"><div class="glass-card-header"><div class="glass-card-title">Progression Zubehoer</div></div>
+    existing += `<div class="glass-card animate-in stagger-2"><div class="glass-card-header"><div class="glass-card-title">Progression Zubehör</div></div>
       <div style="font-size:13px;color:var(--ink-secondary);line-height:1.6;white-space:pre-line;">${p.progressionAccessory}</div>
     </div>`;
     document.getElementById('progressionSection').innerHTML = existing;
@@ -2682,7 +2943,7 @@ function clearData() {
     if (k.startsWith('ft_' + currentUser + '_')) keys.push(k);
   }
   keys.forEach(k => localStorage.removeItem(k));
-  toast('Alle Daten geloescht');
+  toast('Alle Daten gelöscht');
   showPage('Dashboard');
 }
 
@@ -2840,7 +3101,7 @@ function deleteFoodEntry(id) {
   let meals = load('food_' + today(), []);
   meals = meals.filter(m => m.id !== id);
   save('food_' + today(), meals);
-  toast('Eintrag geloescht');
+  toast('Eintrag gelöscht');
   renderFoodDaily();
 }
 
@@ -3048,6 +3309,297 @@ function handleChatKey(e) {
 function autoResizeChatInput(el) {
   el.style.height = '40px';
   el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+// ==================== FOOD SEARCH (Open Food Facts) ====================
+let foodSearchTimeout = null;
+let foodSearchAbort = null;
+
+function onFoodSearchInput(query) {
+  clearTimeout(foodSearchTimeout);
+  const resultsEl = document.getElementById('foodSearchResults');
+
+  if (!query || query.trim().length < 2) {
+    resultsEl.classList.remove('open');
+    return;
+  }
+
+  resultsEl.classList.add('open');
+  resultsEl.innerHTML = '<div class="food-search-status">Suche...</div>';
+
+  foodSearchTimeout = setTimeout(() => searchFoodDatabase(query.trim()), 300);
+}
+
+async function searchFoodDatabase(query) {
+  const resultsEl = document.getElementById('foodSearchResults');
+
+  if (foodSearchAbort) foodSearchAbort.abort();
+  foodSearchAbort = new AbortController();
+
+  try {
+    const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=10&fields=product_name,nutriments,image_front_small_url,brands,serving_size,code&lc=de`;
+    const resp = await fetch(url, { signal: foodSearchAbort.signal });
+    const data = await resp.json();
+
+    if (!data.products || data.products.length === 0) {
+      resultsEl.innerHTML = '<div class="food-search-status">Keine Ergebnisse</div>';
+      return;
+    }
+
+    resultsEl.innerHTML = data.products.map((p, i) => {
+      const name = p.product_name || 'Unbekannt';
+      const brand = p.brands || '';
+      const kcal = Math.round(p.nutriments?.['energy-kcal_100g'] || p.nutriments?.['energy-kcal'] || 0);
+      const protein = Math.round(p.nutriments?.proteins_100g || 0);
+      const imgSrc = p.image_front_small_url || '';
+      return `<div class="food-search-item" onclick='selectSearchResult(${JSON.stringify({
+        name: name,
+        brand: brand,
+        kcal: kcal,
+        protein: protein,
+        carbs: Math.round(p.nutriments?.carbohydrates_100g || 0),
+        fat: Math.round(p.nutriments?.fat_100g || 0),
+        img: imgSrc,
+        serving: p.serving_size || '',
+        code: p.code || ''
+      }).replace(/'/g, "&#39;")})'>
+        ${imgSrc ? `<img class="food-search-item-img" src="${imgSrc}" alt="" onerror="this.style.display='none'"/>` : '<div class="food-search-item-img" style="display:flex;align-items:center;justify-content:center;font-size:20px;">&#x1F34E;</div>'}
+        <div class="food-search-item-info">
+          <div class="food-search-item-name">${escapeHtml(name)}</div>
+          ${brand ? `<div class="food-search-item-brand">${escapeHtml(brand)}</div>` : ''}
+          <div class="food-search-item-macros">pro 100g: ${kcal} kcal, ${protein}g Protein</div>
+        </div>
+      </div>`;
+    }).join('');
+  } catch (err) {
+    if (err.name === 'AbortError') return;
+    resultsEl.innerHTML = '<div class="food-search-status">Fehler bei der Suche</div>';
+  }
+}
+
+function selectSearchResult(product) {
+  // Close search results
+  document.getElementById('foodSearchResults').classList.remove('open');
+  document.getElementById('foodSearchInput').value = '';
+
+  // Show portion modal
+  showFoodPortionModal(product);
+}
+
+function showFoodPortionModal(product) {
+  const html = `
+    <div class="modal-handle"></div>
+    <h3>${escapeHtml(product.name)}</h3>
+    ${product.brand ? `<div style="font-size:12px;color:var(--ink-muted);margin:-8px 0 12px;">${escapeHtml(product.brand)}</div>` : ''}
+    <div style="font-size:13px;color:var(--ink-secondary);margin-bottom:12px;">
+      Nährwerte pro 100g: ${product.kcal} kcal &middot; ${product.protein}g P &middot; ${product.carbs}g K &middot; ${product.fat}g F
+      ${product.serving ? `<br>Portionsgröße: ${escapeHtml(product.serving)}` : ''}
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:13px;font-weight:600;color:var(--ink-secondary);display:block;margin-bottom:6px;">Menge (g)</label>
+      <input type="number" id="foodPortionInput" value="100" min="1" inputmode="numeric" style="text-align:center;font-size:18px;font-weight:700;" oninput="updatePortionMacros()"/>
+    </div>
+    <div class="food-macros-grid" id="foodPortionMacros">
+      <div class="food-macro-item"><div class="food-macro-val" id="portionKcal">${product.kcal}</div><div class="food-macro-label">kcal</div></div>
+      <div class="food-macro-item"><div class="food-macro-val" id="portionProtein">${product.protein}g</div><div class="food-macro-label">Protein</div></div>
+      <div class="food-macro-item"><div class="food-macro-val" id="portionCarbs">${product.carbs}g</div><div class="food-macro-label">Carbs</div></div>
+      <div class="food-macro-item"><div class="food-macro-val" id="portionFat">${product.fat}g</div><div class="food-macro-label">Fett</div></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:12px;">
+      <button class="btn-primary" style="flex:1;" onclick="saveFoodFromSearch()">Speichern</button>
+      <button style="flex:0.6;padding:14px;border-radius:var(--radius);font-size:15px;font-weight:700;background:var(--card);border:1px solid var(--card-border);color:var(--ink);" onclick="closeModal()">Abbrechen</button>
+    </div>`;
+
+  // Store product data for save
+  window._pendingSearchProduct = product;
+  showModal(html);
+  setTimeout(() => document.getElementById('foodPortionInput')?.focus(), 300);
+}
+
+function updatePortionMacros() {
+  const product = window._pendingSearchProduct;
+  if (!product) return;
+  const grams = parseFloat(document.getElementById('foodPortionInput')?.value) || 0;
+  const factor = grams / 100;
+
+  document.getElementById('portionKcal').textContent = Math.round(product.kcal * factor);
+  document.getElementById('portionProtein').textContent = Math.round(product.protein * factor) + 'g';
+  document.getElementById('portionCarbs').textContent = Math.round(product.carbs * factor) + 'g';
+  document.getElementById('portionFat').textContent = Math.round(product.fat * factor) + 'g';
+}
+
+function saveFoodFromSearch() {
+  const product = window._pendingSearchProduct;
+  if (!product) return;
+  const grams = parseFloat(document.getElementById('foodPortionInput')?.value) || 100;
+  const factor = grams / 100;
+
+  const entry = {
+    id: Date.now(),
+    name: product.name + (grams !== 100 ? ` (${grams}g)` : ''),
+    kcal: Math.round(product.kcal * factor),
+    protein: Math.round(product.protein * factor),
+    carbs: Math.round(product.carbs * factor),
+    fat: Math.round(product.fat * factor),
+    thumb: product.img || null,
+    time: new Date().toISOString(),
+    date: today(),
+    source: 'search',
+    barcode: product.code || null
+  };
+
+  const meals = load('food_' + today(), []);
+  meals.push(entry);
+  save('food_' + today(), meals);
+
+  window._pendingSearchProduct = null;
+  closeModal();
+  toast('Mahlzeit gespeichert!');
+  renderFoodDaily();
+}
+
+// Close search results when clicking outside
+document.addEventListener('click', function(e) {
+  const searchWrap = document.querySelector('.food-search-wrap');
+  if (searchWrap && !searchWrap.contains(e.target)) {
+    document.getElementById('foodSearchResults')?.classList.remove('open');
+  }
+});
+
+// ==================== BARCODE SCANNER ====================
+let scannerStream = null;
+let scannerDetector = null;
+let scannerAnimFrame = null;
+
+function openBarcodeScanner() {
+  const hasBarcodeDetector = 'BarcodeDetector' in window;
+
+  if (!hasBarcodeDetector) {
+    // Fallback: manual barcode input
+    showModal(`
+      <div class="modal-handle"></div>
+      <h3>Barcode eingeben</h3>
+      <div style="font-size:13px;color:var(--ink-muted);margin-bottom:12px;">
+        Dein Browser unterstützt keinen Barcode-Scanner. Gib den Barcode manuell ein.
+      </div>
+      <div class="scanner-fallback">
+        <input type="text" id="manualBarcodeInput" placeholder="z.B. 4015000960892" inputmode="numeric" style="max-width:100%;font-size:16px;letter-spacing:1px;text-align:center;"/>
+      </div>
+      <button class="btn-primary" onclick="lookupManualBarcode()">Suchen</button>
+    `);
+    setTimeout(() => document.getElementById('manualBarcodeInput')?.focus(), 300);
+    return;
+  }
+
+  const overlay = document.getElementById('scannerOverlay');
+  overlay.classList.add('open');
+  document.getElementById('scannerHint').textContent = 'Halte den Barcode in den Rahmen';
+  startCameraForScanner();
+}
+
+async function startCameraForScanner() {
+  try {
+    scannerStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+    });
+
+    const video = document.getElementById('scannerVideo');
+    video.srcObject = scannerStream;
+    await video.play();
+
+    scannerDetector = new BarcodeDetector({ formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39'] });
+    scanBarcodeFrame();
+  } catch (err) {
+    document.getElementById('scannerHint').textContent = 'Kamera konnte nicht gestartet werden';
+    console.error('Camera error:', err);
+  }
+}
+
+async function scanBarcodeFrame() {
+  const video = document.getElementById('scannerVideo');
+  if (!video || !scannerDetector || video.readyState < 2) {
+    scannerAnimFrame = requestAnimationFrame(scanBarcodeFrame);
+    return;
+  }
+
+  try {
+    const barcodes = await scannerDetector.detect(video);
+    if (barcodes.length > 0) {
+      const code = barcodes[0].rawValue;
+      if (code && code.length >= 8) {
+        // Success - vibrate and look up product
+        if (navigator.vibrate) navigator.vibrate(100);
+        closeBarcodeScanner();
+        lookupBarcode(code);
+        return;
+      }
+    }
+  } catch (err) {
+    // Detection error, keep scanning
+  }
+
+  scannerAnimFrame = requestAnimationFrame(scanBarcodeFrame);
+}
+
+function closeBarcodeScanner() {
+  const overlay = document.getElementById('scannerOverlay');
+  overlay.classList.remove('open');
+
+  if (scannerAnimFrame) {
+    cancelAnimationFrame(scannerAnimFrame);
+    scannerAnimFrame = null;
+  }
+
+  if (scannerStream) {
+    scannerStream.getTracks().forEach(track => track.stop());
+    scannerStream = null;
+  }
+
+  const video = document.getElementById('scannerVideo');
+  if (video) video.srcObject = null;
+
+  scannerDetector = null;
+}
+
+async function lookupManualBarcode() {
+  const code = document.getElementById('manualBarcodeInput')?.value?.trim();
+  if (!code || code.length < 8) {
+    toast('Bitte gültigen Barcode eingeben', 'error');
+    return;
+  }
+  closeModal();
+  lookupBarcode(code);
+}
+
+async function lookupBarcode(code) {
+  toast('Suche Produkt...', 'info');
+
+  try {
+    const resp = await fetch(`https://world.openfoodfacts.org/api/v0/product/${encodeURIComponent(code)}.json`);
+    const data = await resp.json();
+
+    if (!data.product || data.status === 0) {
+      toast('Produkt nicht gefunden', 'error');
+      return;
+    }
+
+    const p = data.product;
+    const product = {
+      name: p.product_name || p.product_name_de || 'Unbekannt',
+      brand: p.brands || '',
+      kcal: Math.round(p.nutriments?.['energy-kcal_100g'] || 0),
+      protein: Math.round(p.nutriments?.proteins_100g || 0),
+      carbs: Math.round(p.nutriments?.carbohydrates_100g || 0),
+      fat: Math.round(p.nutriments?.fat_100g || 0),
+      img: p.image_front_small_url || '',
+      serving: p.serving_size || '',
+      code: code
+    };
+
+    showFoodPortionModal(product);
+  } catch (err) {
+    toast('Fehler bei der Barcode-Suche', 'error');
+  }
 }
 
 // ==================== SERVICE WORKER ====================
