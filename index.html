@@ -960,6 +960,144 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
 .setting-section { margin: 12px 0; }
 .setting-label { font-size: 13px; font-weight: 600; color: var(--ink-secondary); margin-bottom: 8px; }
 
+/* ==================== GOOGLE FIT CONNECTION ==================== */
+.gfit-card { position: relative; overflow: hidden; }
+.gfit-card::after {
+  content: '';
+  position: absolute;
+  top: -30%; right: -15%;
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  background: rgba(66,133,244,0.06);
+  pointer-events: none;
+}
+.gfit-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.gfit-info { flex: 1; }
+.gfit-title {
+  font-size: 15px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.gfit-title img {
+  width: 22px;
+  height: 22px;
+}
+.gfit-sub {
+  font-size: 12px;
+  color: var(--ink-muted);
+  margin-top: 2px;
+}
+.gfit-status {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+.gfit-status.connected {
+  color: var(--green);
+  background: rgba(var(--green-rgb),0.1);
+}
+.gfit-status.disconnected {
+  color: var(--ink-muted);
+  background: var(--card);
+}
+.gfit-connect-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #4285f4, #34a853);
+  margin-top: 14px;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 4px 16px rgba(66,133,244,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.gfit-connect-btn:active { transform: scale(0.97); }
+.gfit-connect-btn:hover { box-shadow: 0 6px 24px rgba(66,133,244,0.35); }
+.gfit-connect-btn.disconnect {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  color: var(--ink-secondary);
+  box-shadow: none;
+}
+.gfit-sync-options {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.gfit-sync-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-secondary);
+  cursor: pointer;
+}
+.gfit-sync-option input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.gfit-last-sync {
+  font-size: 11px;
+  color: var(--ink-muted);
+  margin-top: 8px;
+}
+.gfit-sync-btn {
+  width: 100%;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  background: rgba(var(--accent-rgb),0.08);
+  margin-top: 10px;
+  transition: transform 0.15s;
+}
+.gfit-sync-btn:active { transform: scale(0.97); }
+.gfit-setup-msg {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  background: rgba(var(--amber-rgb),0.08);
+  border: 1px solid rgba(var(--amber-rgb),0.15);
+  font-size: 12px;
+  color: var(--amber);
+  line-height: 1.5;
+}
+.gfit-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(66,133,244,0.12);
+  color: #4285f4;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
 /* ==================== SECTION DIVIDER ==================== */
 .section-label {
   font-size: 12px;
@@ -2249,6 +2387,12 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
     <div id="hinweiseSection"></div>
     <div id="checklistSection"></div>
     <div id="progressionSection"></div>
+    <div class="glass-card animate-in gfit-card" id="googleFitCard">
+      <div class="glass-card-header">
+        <div class="glass-card-title">Verbindungen</div>
+      </div>
+      <div id="googleFitContent"></div>
+    </div>
     <div class="glass-card animate-in">
       <div class="glass-card-header">
         <div class="glass-card-title">Anpassungsregeln</div>
@@ -2768,33 +2912,13 @@ function quickToggleSupp(i) {
 }
 
 function renderDashSteps() {
-  const p = plan();
-  const stepsData = load('steps_' + today(), 0);
-  const goal = p.stepsGoal;
-  const pct = Math.min(stepsData / goal, 1);
-  const circumference = 2 * Math.PI * 34;
-  const offset = circumference * (1 - pct);
+  // Use Google Fit-aware renderer
+  renderDashStepsWithGfit();
 
-  document.getElementById('dashSteps').innerHTML = `
-    <div class="steps-ring-wrap">
-      <svg viewBox="0 0 80 80" width="80" height="80">
-        <circle class="steps-ring-bg" cx="40" cy="40" r="34"/>
-        <circle class="steps-ring-fill" cx="40" cy="40" r="34"
-          stroke-dasharray="${circumference}"
-          stroke-dashoffset="${offset}"
-          style="--ring-circumference:${circumference}; animation: ringFill 1s cubic-bezier(0.16,1,0.3,1) both;"/>
-      </svg>
-      <div class="steps-ring-text">
-        <div class="steps-ring-val">${stepsData.toLocaleString('de')}</div>
-        <div class="steps-ring-label">Schritte</div>
-      </div>
-    </div>
-    <div class="steps-info">
-      <div class="steps-info-title">Tagesziel: ${goal.toLocaleString('de')} Schritte</div>
-      <div class="steps-info-sub">${pct >= 1 ? 'Ziel erreicht!' : `Noch ${(goal - stepsData).toLocaleString('de')} Schritte`}</div>
-      <button onclick="promptSteps()" style="margin-top:6px;font-size:12px;font-weight:600;color:var(--accent);padding:4px 8px;border-radius:6px;background:rgba(var(--accent-rgb),0.08);">Schritte eintragen</button>
-    </div>
-  `;
+  // Auto-sync from Google Fit if connected
+  if (gfitIsConnected()) {
+    gfitSyncAll().catch(() => {});
+  }
 }
 
 function promptSteps() {
@@ -3726,6 +3850,9 @@ function renderSettings() {
 
   // Adjust rules
   document.getElementById('adjustRules').innerHTML = p.adjustRules;
+
+  // Google Fit
+  renderGoogleFitSettings();
 }
 
 // ==================== EXPORT / IMPORT ====================
@@ -4695,16 +4822,411 @@ function saveMood() {
   renderDashboardMood();
 }
 
+// ==================== GOOGLE FIT INTEGRATION ====================
+let _gfitClientId = null;
+let _gfitConfigChecked = false;
+
+function gfitKey(k) { return `ft_${currentUser}_googlefit_${k}`; }
+
+function gfitGetTokens() {
+  try {
+    const raw = localStorage.getItem(gfitKey('tokens'));
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+
+function gfitSaveTokens(tokens) {
+  localStorage.setItem(gfitKey('tokens'), JSON.stringify(tokens));
+}
+
+function gfitClearTokens() {
+  localStorage.removeItem(gfitKey('tokens'));
+  localStorage.removeItem(gfitKey('lastSync'));
+  localStorage.removeItem(gfitKey('settings'));
+}
+
+function gfitGetSettings() {
+  try {
+    const raw = localStorage.getItem(gfitKey('settings'));
+    return raw ? JSON.parse(raw) : { syncSteps: true, syncWeight: true };
+  } catch { return { syncSteps: true, syncWeight: true }; }
+}
+
+function gfitSaveSettings(settings) {
+  localStorage.setItem(gfitKey('settings'), JSON.stringify(settings));
+}
+
+function gfitIsConnected() {
+  const tokens = gfitGetTokens();
+  return tokens && tokens.access_token && tokens.refresh_token;
+}
+
+function gfitIsTokenExpired() {
+  const tokens = gfitGetTokens();
+  if (!tokens || !tokens.expires_at) return true;
+  return Date.now() >= tokens.expires_at - 60000; // 1 min buffer
+}
+
+async function gfitFetchConfig() {
+  if (_gfitConfigChecked) return _gfitClientId;
+  try {
+    const res = await fetch('/api/google-fit-config');
+    const data = await res.json();
+    _gfitClientId = data.clientId || null;
+  } catch {
+    _gfitClientId = null;
+  }
+  _gfitConfigChecked = true;
+  return _gfitClientId;
+}
+
+function gfitStartOAuth() {
+  if (!_gfitClientId) {
+    toast('Google Fit nicht konfiguriert', 'error');
+    return;
+  }
+  const redirectUri = window.location.origin + window.location.pathname;
+  const scope = 'https://www.googleapis.com/auth/fitness.activity.read https://www.googleapis.com/auth/fitness.body.read';
+  const params = new URLSearchParams({
+    client_id: _gfitClientId,
+    redirect_uri: redirectUri,
+    response_type: 'code',
+    scope: scope,
+    access_type: 'offline',
+    prompt: 'consent',
+    state: 'googlefit_' + currentUser
+  });
+  window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params.toString();
+}
+
+async function gfitHandleOAuthRedirect() {
+  const url = new URL(window.location.href);
+  const code = url.searchParams.get('code');
+  const state = url.searchParams.get('state');
+
+  if (!code || !state || !state.startsWith('googlefit_')) return false;
+
+  // Extract user from state
+  const stateUser = state.replace('googlefit_', '');
+
+  // Clean URL immediately
+  url.searchParams.delete('code');
+  url.searchParams.delete('state');
+  url.searchParams.delete('scope');
+  history.replaceState(null, '', url.pathname + url.search);
+
+  // If no user selected yet, set it from state
+  if (!currentUser && PLANS[stateUser]) {
+    currentUser = stateUser;
+    localStorage.setItem('ft_lastUser', stateUser);
+  }
+
+  try {
+    const redirectUri = window.location.origin + window.location.pathname;
+    const res = await fetch('/api/google-fit-auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, redirectUri })
+    });
+
+    if (!res.ok) throw new Error('Token exchange failed');
+
+    const data = await res.json();
+    const tokens = {
+      access_token: data.access_token,
+      refresh_token: data.refresh_token,
+      expires_at: Date.now() + (data.expires_in * 1000)
+    };
+    gfitSaveTokens(tokens);
+    gfitSaveSettings({ syncSteps: true, syncWeight: true });
+    toast('Google Fit verbunden!');
+    return true;
+  } catch (err) {
+    console.error('Google Fit OAuth error:', err);
+    toast('Google Fit Verbindung fehlgeschlagen', 'error');
+    return false;
+  }
+}
+
+async function gfitRefreshToken() {
+  const tokens = gfitGetTokens();
+  if (!tokens || !tokens.refresh_token) return false;
+
+  try {
+    const res = await fetch('/api/google-fit-refresh', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken: tokens.refresh_token })
+    });
+
+    if (!res.ok) throw new Error('Token refresh failed');
+
+    const data = await res.json();
+    tokens.access_token = data.access_token;
+    tokens.expires_at = Date.now() + (data.expires_in * 1000);
+    gfitSaveTokens(tokens);
+    return true;
+  } catch (err) {
+    console.error('Google Fit token refresh error:', err);
+    return false;
+  }
+}
+
+async function gfitEnsureValidToken() {
+  if (!gfitIsConnected()) return false;
+  if (gfitIsTokenExpired()) {
+    const refreshed = await gfitRefreshToken();
+    if (!refreshed) {
+      gfitClearTokens();
+      toast('Google Fit Sitzung abgelaufen. Bitte erneut verbinden.', 'error');
+      return false;
+    }
+  }
+  return true;
+}
+
+async function gfitFetchData(dataType) {
+  const tokens = gfitGetTokens();
+  if (!tokens) return null;
+
+  const now = new Date();
+  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const endOfDay = new Date(startOfDay.getTime() + 86400000);
+
+  try {
+    const res = await fetch('/api/google-fit-data', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        accessToken: tokens.access_token,
+        dataType,
+        startTime: startOfDay.getTime(),
+        endTime: endOfDay.getTime()
+      })
+    });
+
+    if (!res.ok) throw new Error('Data fetch failed');
+    return await res.json();
+  } catch (err) {
+    console.error(`Google Fit ${dataType} fetch error:`, err);
+    return null;
+  }
+}
+
+async function gfitSyncAll() {
+  if (!gfitIsConnected()) return;
+  const valid = await gfitEnsureValidToken();
+  if (!valid) return;
+
+  const settings = gfitGetSettings();
+  let synced = false;
+
+  if (settings.syncSteps) {
+    const stepsData = await gfitFetchData('steps');
+    if (stepsData && typeof stepsData.steps === 'number') {
+      save('steps_' + today(), stepsData.steps);
+      synced = true;
+    }
+  }
+
+  if (settings.syncWeight) {
+    const weightData = await gfitFetchData('weight');
+    if (weightData && weightData.weight && weightData.weight > 0) {
+      const weights = load('weights', []);
+      const todayStr = today();
+      const existing = weights.find(w => w.date === todayStr);
+      if (!existing) {
+        // Only import if we don't have a manual entry for today
+        showConfirm(
+          'Gewicht importieren',
+          `Google Fit hat ${weightData.weight.toFixed(1)} kg gemeldet. Importieren?`,
+          () => {
+            const weights = load('weights', []);
+            weights.push({ date: todayStr, value: parseFloat(weightData.weight.toFixed(1)) });
+            weights.sort((a, b) => a.date.localeCompare(b.date));
+            save('weights', weights);
+            toast('Gewicht importiert!');
+            renderDashboard();
+          },
+          true
+        );
+      }
+      synced = true;
+    }
+  }
+
+  if (synced) {
+    localStorage.setItem(gfitKey('lastSync'), Date.now().toString());
+    renderDashboard();
+  }
+}
+
+async function gfitManualSync() {
+  toast('Synchronisiere...');
+  await gfitSyncAll();
+  toast('Synchronisation abgeschlossen!');
+  // Re-render settings to update last sync time
+  renderGoogleFitSettings();
+}
+
+function gfitDisconnect() {
+  showConfirm(
+    'Google Fit trennen',
+    'Die Verbindung zu Google Fit wird getrennt. Deine bisherigen Daten bleiben erhalten.',
+    () => {
+      gfitClearTokens();
+      toast('Google Fit getrennt');
+      renderGoogleFitSettings();
+      renderDashboard();
+    }
+  );
+}
+
+async function renderGoogleFitSettings() {
+  const container = document.getElementById('googleFitContent');
+  if (!container) return;
+
+  const clientId = await gfitFetchConfig();
+  const connected = gfitIsConnected();
+
+  // Google Fit SVG icon (simplified)
+  const gfitIcon = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+    <path d="M12 2L8.5 8.5 2 12l6.5 3.5L12 22l3.5-6.5L22 12l-6.5-3.5z" fill="#4285f4"/>
+    <path d="M12 8.5L8.5 8.5 12 2l3.5 6.5z" fill="#ea4335"/>
+    <path d="M15.5 8.5L22 12l-6.5 3.5z" fill="#fbbc04"/>
+    <path d="M12 15.5l3.5 6.5-3.5-6.5-3.5 6.5z" fill="#34a853"/>
+    <path d="M2 12l6.5 3.5L12 12z" fill="#4285f4"/>
+  </svg>`;
+
+  if (!clientId) {
+    // No credentials configured
+    container.innerHTML = `
+      <div class="gfit-header">
+        <div class="gfit-info">
+          <div class="gfit-title">${gfitIcon} Google Fit</div>
+          <div class="gfit-sub">Schritte & Gewicht synchronisieren</div>
+        </div>
+        <div class="gfit-status disconnected">Nicht konfiguriert</div>
+      </div>
+      <div class="gfit-setup-msg">
+        <strong>Setup erforderlich:</strong><br>
+        1. Google Cloud Projekt erstellen<br>
+        2. Fitness API aktivieren<br>
+        3. OAuth 2.0 Credentials anlegen<br>
+        4. GOOGLE_CLIENT_ID & GOOGLE_CLIENT_SECRET als Vercel Env Vars setzen
+      </div>
+    `;
+    return;
+  }
+
+  if (!connected) {
+    container.innerHTML = `
+      <div class="gfit-header">
+        <div class="gfit-info">
+          <div class="gfit-title">${gfitIcon} Google Fit</div>
+          <div class="gfit-sub">Schritte & Gewicht synchronisieren</div>
+        </div>
+        <div class="gfit-status disconnected">Nicht verbunden</div>
+      </div>
+      <button class="gfit-connect-btn" onclick="gfitStartOAuth()">
+        ${gfitIcon} Mit Google Fit verbinden
+      </button>
+    `;
+    return;
+  }
+
+  // Connected state
+  const settings = gfitGetSettings();
+  const lastSync = localStorage.getItem(gfitKey('lastSync'));
+  const lastSyncStr = lastSync
+    ? new Date(parseInt(lastSync)).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+    : 'Noch nie';
+
+  container.innerHTML = `
+    <div class="gfit-header">
+      <div class="gfit-info">
+        <div class="gfit-title">${gfitIcon} Google Fit</div>
+        <div class="gfit-sub">Automatische Synchronisation aktiv</div>
+      </div>
+      <div class="gfit-status connected">Verbunden</div>
+    </div>
+    <div class="gfit-last-sync">Letzte Sync: ${lastSyncStr}</div>
+    <div class="gfit-sync-options">
+      <label class="gfit-sync-option">
+        <input type="checkbox" ${settings.syncSteps ? 'checked' : ''} onchange="gfitToggleSetting('syncSteps', this.checked)"/>
+        Schritte synchronisieren
+      </label>
+      <label class="gfit-sync-option">
+        <input type="checkbox" ${settings.syncWeight ? 'checked' : ''} onchange="gfitToggleSetting('syncWeight', this.checked)"/>
+        Gewicht synchronisieren
+      </label>
+    </div>
+    <button class="gfit-sync-btn" onclick="gfitManualSync()">Jetzt synchronisieren</button>
+    <button class="gfit-connect-btn disconnect" onclick="gfitDisconnect()">Trennen</button>
+  `;
+}
+
+function gfitToggleSetting(key, value) {
+  const settings = gfitGetSettings();
+  settings[key] = value;
+  gfitSaveSettings(settings);
+}
+
+// Dashboard integration: render steps with Google Fit badge
+function renderDashStepsWithGfit() {
+  const p = plan();
+  const stepsData = load('steps_' + today(), 0);
+  const goal = p.stepsGoal;
+  const pct = Math.min(stepsData / goal, 1);
+  const circumference = 2 * Math.PI * 34;
+  const offset = circumference * (1 - pct);
+  const connected = gfitIsConnected();
+  const badge = connected ? '<span class="gfit-badge">Google Fit</span>' : '';
+
+  document.getElementById('dashSteps').innerHTML = `
+    <div class="steps-ring-wrap">
+      <svg viewBox="0 0 80 80" width="80" height="80">
+        <circle class="steps-ring-bg" cx="40" cy="40" r="34"/>
+        <circle class="steps-ring-fill" cx="40" cy="40" r="34"
+          stroke-dasharray="${circumference}"
+          stroke-dashoffset="${offset}"
+          style="--ring-circumference:${circumference}; animation: ringFill 1s cubic-bezier(0.16,1,0.3,1) both;"/>
+      </svg>
+      <div class="steps-ring-text">
+        <div class="steps-ring-val">${stepsData.toLocaleString('de')}</div>
+        <div class="steps-ring-label">Schritte</div>
+      </div>
+    </div>
+    <div class="steps-info">
+      <div class="steps-info-title">Tagesziel: ${goal.toLocaleString('de')} Schritte ${badge}</div>
+      <div class="steps-info-sub">${pct >= 1 ? 'Ziel erreicht!' : `Noch ${(goal - stepsData).toLocaleString('de')} Schritte`}</div>
+      <button onclick="promptSteps()" style="margin-top:6px;font-size:12px;font-weight:600;color:var(--accent);padding:4px 8px;border-radius:6px;background:rgba(var(--accent-rgb),0.08);">Schritte eintragen</button>
+    </div>
+  `;
+}
+
 // ==================== SERVICE WORKER ====================
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 
 // ==================== STARTUP ====================
-const lastUser = localStorage.getItem('ft_lastUser');
-if (lastUser && PLANS[lastUser]) {
-  selectProfile(lastUser);
-}
+(async function startup() {
+  // 1. Check for Google Fit OAuth redirect (must run early, before profile select)
+  const url = new URL(window.location.href);
+  const hasOAuthCode = url.searchParams.has('code') && url.searchParams.has('state') &&
+                       (url.searchParams.get('state') || '').startsWith('googlefit_');
+
+  if (hasOAuthCode) {
+    await gfitHandleOAuthRedirect();
+  }
+
+  // 2. Auto-select profile if remembered
+  const lastUser = localStorage.getItem('ft_lastUser');
+  if (lastUser && PLANS[lastUser] && !currentUser) {
+    selectProfile(lastUser);
+  }
+})();
 </script>
 </body>
 </html>
