@@ -1166,6 +1166,7 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
 .food-search-wrap {
   position: relative;
   margin: 8px 0;
+  z-index: 70;
 }
 .food-search-row {
   display: flex;
@@ -1213,15 +1214,15 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
 .food-search-results {
   position: absolute;
   top: calc(100% + 4px);
-  left: 0; right: 0;
+  left: -18px; right: -18px;
   background: var(--bg-elevated);
   border: 1px solid var(--card-border);
   border-radius: var(--radius-sm);
-  max-height: 320px;
+  max-height: 50vh;
   overflow-y: auto;
-  z-index: 60;
+  z-index: 200;
   display: none;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
 }
 .food-search-results.open { display: block; animation: fadeIn 0.2s ease both; }
 
@@ -2995,18 +2996,24 @@ function handleFoodPhoto(event) {
   const reader = new FileReader();
   reader.onload = function(e) {
     const fullBase64 = e.target.result;
-    // Create thumbnail (max 200px) for storage
     const img = new Image();
     img.onload = function() {
-      const maxSize = 200;
-      const scale = Math.min(maxSize / img.width, maxSize / img.height, 1);
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width * scale;
-      canvas.height = img.height * scale;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      currentFoodThumb = canvas.toDataURL('image/jpeg', 0.7);
-      analyzeFood(fullBase64);
+      // Thumbnail for localStorage (200px)
+      const thumbScale = Math.min(200 / img.width, 200 / img.height, 1);
+      const thumbCanvas = document.createElement('canvas');
+      thumbCanvas.width = img.width * thumbScale;
+      thumbCanvas.height = img.height * thumbScale;
+      thumbCanvas.getContext('2d').drawImage(img, 0, 0, thumbCanvas.width, thumbCanvas.height);
+      currentFoodThumb = thumbCanvas.toDataURL('image/jpeg', 0.7);
+
+      // Compressed version for API (max 800px, keeps enough detail for food recognition)
+      const apiScale = Math.min(800 / img.width, 800 / img.height, 1);
+      const apiCanvas = document.createElement('canvas');
+      apiCanvas.width = img.width * apiScale;
+      apiCanvas.height = img.height * apiScale;
+      apiCanvas.getContext('2d').drawImage(img, 0, 0, apiCanvas.width, apiCanvas.height);
+      const compressedBase64 = apiCanvas.toDataURL('image/jpeg', 0.75);
+      analyzeFood(compressedBase64);
     };
     img.src = fullBase64;
   };
@@ -3346,7 +3353,7 @@ async function searchFoodDatabase(query) {
   foodSearchAbort = new AbortController();
 
   try {
-    const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=10&fields=product_name,nutriments,image_front_small_url,brands,serving_size,code&lc=de`;
+    const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=15&fields=product_name,nutriments,image_front_small_url,brands,serving_size,code&lc=de&cc=de`;
     const resp = await fetch(url, { signal: foodSearchAbort.signal });
     const data = await resp.json();
 

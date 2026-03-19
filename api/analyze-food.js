@@ -26,26 +26,27 @@ module.exports = async function handler(req, res) {
 
     const prompt = mode === 'barcode'
       ? `Look at this image and find any barcode (EAN, UPC, etc.). Read the numbers below or within the barcode. Return ONLY valid JSON: { "barcode": "the number string" }. If no barcode found, return { "barcode": "" }.`
-      : `Analyze the food in this image. Estimate the nutritional values as accurately as possible based on typical portion sizes visible in the photo.
+      : `You are a precise food nutrition analyzer. Analyze the food in this image carefully.
 
-Return ONLY valid JSON (no markdown, no code fences) with this exact structure:
+IMPORTANT RULES:
+- If you can see a product label, brand name, or packaging, identify the EXACT product and use its REAL nutritional values (e.g. a Hanuta wafer is 119 kcal per piece, not 250)
+- If it's a packaged product, look for any visible nutritional info on the packaging
+- For home-cooked meals, estimate based on visible portion size (use a standard plate as ~25cm reference)
+- Be CONSERVATIVE with estimates — it's better to be slightly under than wildly over
+- For single items (one cookie, one fruit, one bar), use the standard single-serving values
+
+Return ONLY valid JSON (no markdown, no code fences):
 {
-  "name": "Name of the meal/food in German",
-  "kcal": estimated total calories (number),
-  "protein": estimated protein in grams (number),
-  "carbs": estimated carbs in grams (number),
-  "fat": estimated fat in grams (number),
-  "confidence": "high" or "medium" or "low",
-  "notes": "Brief note in German about the estimation"
+  "name": "Product/food name in German",
+  "kcal": number (total for the visible portion),
+  "protein": number (grams),
+  "carbs": number (grams),
+  "fat": number (grams),
+  "confidence": "high" if packaged product identified, "medium" if clear food visible, "low" if uncertain,
+  "notes": "Brief German note: what you identified, portion size assumption"
 }
 
-If you cannot identify food in the image, return:
-{
-  "name": "Nicht erkannt",
-  "kcal": 0, "protein": 0, "carbs": 0, "fat": 0,
-  "confidence": "low",
-  "notes": "Kein Essen im Bild erkannt"
-}`;
+If no food visible: {"name":"Nicht erkannt","kcal":0,"protein":0,"carbs":0,"fat":0,"confidence":"low","notes":"Kein Essen erkannt"}`;
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
