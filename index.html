@@ -3573,11 +3573,14 @@ function renderSharedNotes(firebaseNotes, localNote, exName) {
 
   var html = '';
 
-  allNotes.forEach(function(note) {
+  var safeExName = exName.replace(/'/g, "\\'");
+  allNotes.forEach(function(note, idx) {
     var author = (note.author || '').toLowerCase();
     var avatar = author === 'mitch' ? 'Mitch.png' : 'Fran.png';
     var name = author === 'mitch' ? 'Mitch' : 'Fran';
     var date = note.timestamp ? new Date(note.timestamp).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
+    var deleteBtn = (author === currentUser) ?
+      '<button onclick="deleteExNote(\'' + safeExName + '\',' + idx + ')" style="color:var(--red);font-size:11px;font-weight:600;padding:2px 6px;border-radius:4px;background:rgba(var(--red-rgb),0.08);margin-top:4px;">Löschen</button>' : '';
     html += '<div style="display:flex;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);">' +
       '<img src="' + avatar + '" style="width:24px;height:24px;border-radius:50%;object-fit:cover;margin-top:2px;flex-shrink:0;"/>' +
       '<div style="flex:1;min-width:0;">' +
@@ -3586,6 +3589,7 @@ function renderSharedNotes(firebaseNotes, localNote, exName) {
           '<span style="font-size:10px;color:var(--ink-muted);">' + date + '</span>' +
         '</div>' +
         '<div style="font-size:13px;line-height:1.4;white-space:pre-wrap;">' + escapeHtml(note.text) + '</div>' +
+        deleteBtn +
       '</div>' +
     '</div>';
   });
@@ -3641,6 +3645,26 @@ function saveExNotes(exName) {
     toast('Notiz lokal gespeichert!');
     renderExercises();
   }
+}
+
+function deleteExNote(exName, noteIndex) {
+  initFirebase();
+  var fbPath = 'notes/' + encodeURIComponent(exName).replace(/\./g, '_');
+  if (!firebaseDB) { toast('Löschen nicht möglich'); return; }
+
+  firebaseDB.ref(fbPath).once('value').then(function(snapshot) {
+    var existing = snapshot.val() || [];
+    var notes = Array.isArray(existing) ? existing : Object.values(existing || {});
+    notes = notes.filter(function(n) { return n && typeof n === 'object' && n.text; });
+    if (noteIndex >= 0 && noteIndex < notes.length) {
+      notes.splice(noteIndex, 1);
+      firebaseDB.ref(fbPath).set(notes).then(function() {
+        toast('Notiz gelöscht');
+        var localNote = loadGlobal('exnotes_' + exName) || '';
+        renderSharedNotes(notes, localNote, exName);
+      });
+    }
+  });
 }
 
 function finishWorkout() {
