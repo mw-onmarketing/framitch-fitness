@@ -2859,22 +2859,22 @@ function renderDashboard() {
 
   // Stats
   document.getElementById('dashStats').innerHTML = `
-    <div class="stat-card animate-in stagger-1">
+    <div class="stat-card">
       <div class="stat-icon">\uD83C\uDFCB\uFE0F</div>
       <div class="stat-value">${workouts.length}</div>
       <div class="stat-label">Trainings gesamt</div>
     </div>
-    <div class="stat-card animate-in stagger-2">
+    <div class="stat-card">
       <div class="stat-icon">\u2696\uFE0F</div>
       <div class="stat-value">${lastW ? lastW.value + ' kg' : '--'}</div>
       <div class="stat-label">Aktuelles Gewicht</div>
     </div>
-    <div class="stat-card animate-in stagger-3">
+    <div class="stat-card">
       <div class="stat-icon">\uD83D\uDC8A</div>
       <div class="stat-value">${suppsDone}/${suppsTotal}</div>
       <div class="stat-label">Supps heute</div>
     </div>
-    <div class="stat-card animate-in stagger-4">
+    <div class="stat-card">
       <div class="stat-icon">\uD83D\uDCC5</div>
       <div class="stat-value">${last ? last.date.slice(5).replace('-', '.') : '--'}</div>
       <div class="stat-label">Letztes Training</div>
@@ -2911,13 +2911,18 @@ function quickToggleSupp(i) {
   renderDashboard();
 }
 
+let _gfitSyncing = false;
 function renderDashSteps() {
   // Use Google Fit-aware renderer
   renderDashStepsWithGfit();
 
-  // Auto-sync from Google Fit if connected
-  if (gfitIsConnected()) {
-    gfitSyncAll().catch(() => {});
+  // Auto-sync from Google Fit if connected (but only once, not on re-renders)
+  if (gfitIsConnected() && !_gfitSyncing) {
+    const lastSync = parseInt(localStorage.getItem(gfitKey('lastSync')) || '0');
+    if (Date.now() - lastSync > 60000) { // Max once per minute
+      _gfitSyncing = true;
+      gfitSyncAll().catch(() => {}).finally(() => { _gfitSyncing = false; });
+    }
   }
 }
 
