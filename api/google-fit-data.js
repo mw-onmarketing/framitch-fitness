@@ -26,7 +26,7 @@ module.exports = async function handler(req, res) {
         body: JSON.stringify({
           aggregateBy: [{
             dataTypeName: 'com.google.step_count.delta',
-            dataSourceId: 'derived:com.google.step_count.delta:com.google.android.gms:estimated_steps'
+            dataSourceId: 'derived:com.google.step_count.delta:com.google.android.gms:merge_step_deltas'
           }],
           bucketByTime: { durationMillis: endTime - startTime },
           startTimeMillis: startTime,

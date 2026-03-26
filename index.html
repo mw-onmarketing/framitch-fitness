@@ -820,6 +820,14 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
 .timer-btn:active { transform: scale(0.95); }
 .timer-btn-stop { background: var(--red); color: #fff; }
 .timer-btn-add { background: var(--card); border: 1px solid var(--card-border); color: var(--ink); }
+.timer-presets { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.timer-preset-btn {
+  padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 700;
+  background: var(--card); border: 1px solid var(--card-border); color: var(--ink);
+  transition: border-color 0.2s, background 0.2s;
+}
+.timer-preset-btn:active { border-color: var(--accent); background: rgba(var(--accent-rgb),0.15); }
+.timer-edit { display: flex; align-items: center; justify-content: center; }
 
 /* ==================== MODAL ==================== */
 .modal-overlay {
@@ -2418,9 +2426,23 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
 <!-- TIMER OVERLAY -->
 <div class="timer-overlay" id="timerOverlay">
   <div class="timer-label" id="timerLabel">Pause</div>
-  <div class="timer-display" id="timerDisplay">0:00</div>
+  <div class="timer-display" id="timerDisplay" onclick="openTimerEdit()">0:00</div>
+  <div class="timer-edit" id="timerEdit" style="display:none;">
+    <input type="number" id="timerEditMin" min="0" max="30" value="0" inputmode="numeric" style="width:60px;text-align:center;font-size:24px;font-weight:800;padding:8px;background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius-sm);color:var(--ink);"/>
+    <span style="font-size:24px;font-weight:800;margin:0 4px;">:</span>
+    <input type="number" id="timerEditSec" min="0" max="59" value="0" inputmode="numeric" style="width:60px;text-align:center;font-size:24px;font-weight:800;padding:8px;background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius-sm);color:var(--ink);"/>
+    <button onclick="applyTimerEdit()" style="margin-left:12px;padding:8px 16px;border-radius:var(--radius-sm);background:var(--accent);color:#fff;font-weight:700;font-size:14px;">OK</button>
+  </div>
+  <div class="timer-presets" id="timerPresets">
+    <button class="timer-preset-btn" onclick="startTimer(60,'Pause')">1:00</button>
+    <button class="timer-preset-btn" onclick="startTimer(90,'Pause')">1:30</button>
+    <button class="timer-preset-btn" onclick="startTimer(120,'Pause')">2:00</button>
+    <button class="timer-preset-btn" onclick="startTimer(150,'Pause')">2:30</button>
+    <button class="timer-preset-btn" onclick="startTimer(180,'Pause')">3:00</button>
+  </div>
   <div class="timer-buttons">
     <button class="timer-btn timer-btn-add" onclick="addTimerTime(30)">+30s</button>
+    <button class="timer-btn timer-btn-add" onclick="addTimerTime(-30)">-30s</button>
     <button class="timer-btn timer-btn-stop" onclick="stopTimer()">Fertig</button>
   </div>
 </div>
@@ -2981,6 +3003,9 @@ function startTimer(seconds, label) {
   timerSeconds = seconds;
   document.getElementById('timerLabel').textContent = label || 'Pause';
   document.getElementById('timerOverlay').classList.add('open');
+  document.getElementById('timerDisplay').style.display = '';
+  document.getElementById('timerEdit').style.display = 'none';
+  document.getElementById('timerPresets').style.display = '';
   updateTimerDisplay();
   clearInterval(timerInterval);
   timerInterval = setInterval(() => {
@@ -3002,6 +3027,35 @@ function addTimerTime(sec) { timerSeconds += sec; updateTimerDisplay(); }
 function stopTimer() {
   clearInterval(timerInterval);
   document.getElementById('timerOverlay').classList.remove('open');
+}
+function openTimerEdit() {
+  clearInterval(timerInterval);
+  var m = Math.floor(Math.abs(timerSeconds) / 60);
+  var s = Math.abs(timerSeconds) % 60;
+  document.getElementById('timerDisplay').style.display = 'none';
+  document.getElementById('timerEdit').style.display = 'flex';
+  document.getElementById('timerPresets').style.display = 'none';
+  document.getElementById('timerEditMin').value = m;
+  document.getElementById('timerEditSec').value = s;
+  document.getElementById('timerEditMin').focus();
+}
+function applyTimerEdit() {
+  var m = parseInt(document.getElementById('timerEditMin').value) || 0;
+  var s = parseInt(document.getElementById('timerEditSec').value) || 0;
+  timerSeconds = m * 60 + s;
+  document.getElementById('timerDisplay').style.display = '';
+  document.getElementById('timerEdit').style.display = 'none';
+  document.getElementById('timerPresets').style.display = '';
+  updateTimerDisplay();
+  clearInterval(timerInterval);
+  timerInterval = setInterval(function() {
+    timerSeconds--;
+    updateTimerDisplay();
+    if (timerSeconds <= 0) {
+      clearInterval(timerInterval);
+      timerDone();
+    }
+  }, 1000);
 }
 function timerDone() {
   // Audio beep
@@ -3053,7 +3107,8 @@ function init() {
   migrateOldFoodData();
   loadCustomPlansIntoMemory();
   updateHeaderDate();
-  showPage('Dashboard');
+  var lastPage = localStorage.getItem('ft_lastPage') || 'Dashboard';
+  showPage(lastPage);
   // Initialize Firebase for chat unread badge
   setTimeout(() => {
     initFirebase();
@@ -3094,6 +3149,7 @@ function updateHeaderDate() {
 // ==================== PAGES ====================
 function showPage(name) {
   closeMoreMenu();
+  localStorage.setItem('ft_lastPage', name);
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const page = document.getElementById('page' + name);
   if (page) page.classList.add('active');
@@ -5957,7 +6013,9 @@ async function edbSearch(query) {
   edbNavStack = [{ type: 'search', label: '"' + query + '"' }];
   updateEdbBreadcrumb();
 
-  const data = await edbFetch('/exercises/search?q=' + encodeURIComponent(query) + '&offset=0&limit=30');
+  var translated = translateExerciseName(query);
+  var searchQuery = translated !== query ? translated : query;
+  const data = await edbFetch('/exercises/search?q=' + encodeURIComponent(searchQuery) + '&offset=0&limit=30');
   if (!data || data.length === 0) {
     content.innerHTML = '<div class="edb-empty">Keine Ergebnisse für "' + escapeHtml(query) + '"</div>';
     return;
@@ -6034,7 +6092,9 @@ function onSwapSearchInput(val) {
 async function swapSearch(query) {
   var resultsEl = document.getElementById('swapSearchResults');
   resultsEl.innerHTML = '<div class="edb-loading">Suche...</div>';
-  var data = await edbFetch('/exercises/search?q=' + encodeURIComponent(query) + '&offset=0&limit=20');
+  var translated = translateExerciseName(query);
+  var searchQuery = translated !== query ? translated : query;
+  var data = await edbFetch('/exercises/search?q=' + encodeURIComponent(searchQuery) + '&offset=0&limit=20');
   if (!data || data.length === 0) {
     resultsEl.innerHTML = '<div class="edb-empty">Keine Ergebnisse für "' + escapeHtml(query) + '"</div>';
     return;
@@ -6635,7 +6695,9 @@ async function pbSearch(query) {
   const resultsEl = document.getElementById('pbSearchResults');
   resultsEl.innerHTML = '<div class="edb-loading">Suche...</div>';
 
-  const data = await edbFetch('/exercises/search?q=' + encodeURIComponent(query) + '&offset=0&limit=20');
+  var translated = translateExerciseName(query);
+  var searchQuery = translated !== query ? translated : query;
+  const data = await edbFetch('/exercises/search?q=' + encodeURIComponent(searchQuery) + '&offset=0&limit=20');
   if (!data || data.length === 0) {
     resultsEl.innerHTML = '<div class="edb-empty">Keine Ergebnisse für "' + escapeHtml(query) + '"</div>';
     return;
@@ -6766,6 +6828,28 @@ function loadCustomPlansIntoMemory() {
   customPlans.forEach(function(cp) {
     PLANS[currentUser].workouts[cp.name] = cp.exercises;
   });
+
+  // Apply swapped exercises from localStorage
+  var customMods = loadGlobal('customPlanMods_' + currentUser) || {};
+  for (var workoutName in customMods) {
+    if (!PLANS[currentUser].workouts[workoutName]) continue;
+    var mods = customMods[workoutName];
+    for (var idx in mods) {
+      var mod = mods[idx];
+      var exIdx = parseInt(idx);
+      if (PLANS[currentUser].workouts[workoutName][exIdx]) {
+        var origEx = PLANS[currentUser].workouts[workoutName][exIdx];
+        PLANS[currentUser].workouts[workoutName][exIdx] = {
+          name: mod.name,
+          target: origEx.target,
+          sets: origEx.sets,
+          anchor: origEx.anchor,
+          _swapped: true,
+          _originalName: mod.originalName || origEx.name
+        };
+      }
+    }
+  }
 }
 
 // ==================== SERVICE WORKER ====================
