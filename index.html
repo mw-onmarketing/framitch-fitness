@@ -1704,7 +1704,7 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
 .chat-input-bar {
   display: flex;
   gap: 8px;
-  padding: 10px 16px;
+  padding: 10px 16px calc(var(--nav-height) + var(--safe-bottom) + 4px);
   background: rgba(10,10,26,0.92);
   backdrop-filter: blur(16px);
   border-top: 1px solid var(--line);
@@ -3368,30 +3368,116 @@ function saveEquipWeight(exName, val) {
 }
 
 function showExNotes(exName) {
-  const notesKey = `exnotes_${exName}`;
-  const existing = loadGlobal(notesKey) || '';
+  initFirebase();
+  var notesKey = 'exnotes_' + exName;
+  var localNote = loadGlobal(notesKey) || '';
 
-  const html = `<div class="modal-handle"></div>
-    <h3>\uD83D\uDCDD ${exName}</h3>
-    <div style="font-size:12px;color:var(--ink-muted);margin-bottom:10px;">Notizen zu dieser Übung (z.B. Grip, Sitzposition, Schmerzstellen...)</div>
-    <textarea id="exNotesTextarea" style="width:100%;min-height:120px;max-height:200px;padding:12px 14px;border-radius:var(--radius-sm);background:var(--card);border:1px solid var(--card-border);color:var(--ink);font-family:var(--font);font-size:14px;line-height:1.5;resize:vertical;outline:none;" placeholder="Notizen hier eingeben...">${escapeHtml(existing)}</textarea>
-    <button class="btn-primary" style="margin-top:12px;" onclick="saveExNotes('${exName.replace(/'/g, "\\'")}')">Speichern</button>`;
+  var fbPath = 'notes/' + encodeURIComponent(exName).replace(/\./g, '_');
+
+  var html = '<div class="modal-handle"></div>' +
+    '<h3>\uD83D\uDCDD ' + escapeHtml(exName) + '</h3>' +
+    '<div style="font-size:12px;color:var(--ink-muted);margin-bottom:10px;">Gemeinsame Notizen (z.B. Grip, Sitzposition, Schmerzstellen...)</div>' +
+    '<div id="sharedNotesList" style="margin-bottom:12px;"><div class="edb-loading" style="padding:12px;">Lade Notizen...</div></div>' +
+    '<div style="display:flex;align-items:flex-start;gap:8px;">' +
+      '<img src="' + (currentUser === 'mitch' ? 'Mitch.png' : 'Fran.png') + '" style="width:28px;height:28px;border-radius:50%;object-fit:cover;margin-top:4px;"/>' +
+      '<textarea id="exNotesTextarea" style="flex:1;min-height:60px;max-height:120px;padding:10px 14px;border-radius:var(--radius-sm);background:var(--card);border:1px solid var(--card-border);color:var(--ink);font-family:var(--font);font-size:13px;line-height:1.4;resize:vertical;outline:none;" placeholder="Neue Notiz schreiben..."></textarea>' +
+    '</div>' +
+    '<button class="btn-primary" style="margin-top:10px;" onclick="saveExNotes(\'' + exName.replace(/'/g, "\\\\'") + '\')">Speichern</button>';
 
   showModal(html);
-  setTimeout(() => document.getElementById('exNotesTextarea')?.focus(), 300);
+
+  if (firebaseDB) {
+    firebaseDB.ref(fbPath).once('value').then(function(snapshot) {
+      var notes = snapshot.val() || [];
+      renderSharedNotes(notes, localNote, exName);
+    }).catch(function() {
+      renderSharedNotes([], localNote, exName);
+    });
+  } else {
+    renderSharedNotes([], localNote, exName);
+  }
+}
+
+function renderSharedNotes(firebaseNotes, localNote, exName) {
+  var container = document.getElementById('sharedNotesList');
+  if (!container) return;
+
+  var allNotes = Array.isArray(firebaseNotes) ? firebaseNotes : Object.values(firebaseNotes || {});
+
+  if (allNotes.length === 0 && !localNote) {
+    container.innerHTML = '<div style="font-size:12px;color:var(--ink-muted);text-align:center;padding:8px;">Noch keine Notizen.</div>';
+    return;
+  }
+
+  var html = '';
+
+  allNotes.forEach(function(note) {
+    if (!note || !note.text) return;
+    var avatar = note.author === 'mitch' ? 'Mitch.png' : 'Fran.png';
+    var name = note.author === 'mitch' ? 'Mitch' : 'Fran';
+    var date = note.timestamp ? new Date(note.timestamp).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
+    html += '<div style="display:flex;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);">' +
+      '<img src="' + avatar + '" style="width:24px;height:24px;border-radius:50%;object-fit:cover;margin-top:2px;flex-shrink:0;"/>' +
+      '<div style="flex:1;min-width:0;">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">' +
+          '<span style="font-size:11px;font-weight:700;color:var(--accent);">' + name + '</span>' +
+          '<span style="font-size:10px;color:var(--ink-muted);">' + date + '</span>' +
+        '</div>' +
+        '<div style="font-size:13px;line-height:1.4;white-space:pre-wrap;">' + escapeHtml(note.text) + '</div>' +
+      '</div>' +
+    '</div>';
+  });
+
+  if (localNote && allNotes.length === 0) {
+    html += '<div style="display:flex;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);">' +
+      '<img src="' + (currentUser === 'mitch' ? 'Mitch.png' : 'Fran.png') + '" style="width:24px;height:24px;border-radius:50%;object-fit:cover;margin-top:2px;flex-shrink:0;"/>' +
+      '<div style="flex:1;">' +
+        '<div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:2px;">' + (currentUser === 'mitch' ? 'Mitch' : 'Fran') + '</div>' +
+        '<div style="font-size:13px;line-height:1.4;white-space:pre-wrap;">' + escapeHtml(localNote) + '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  container.innerHTML = html;
 }
 
 function saveExNotes(exName) {
-  const text = document.getElementById('exNotesTextarea')?.value?.trim() || '';
-  const notesKey = `exnotes_${exName}`;
-  if (text) {
-    saveGlobal(notesKey, text);
+  var text = document.getElementById('exNotesTextarea')?.value?.trim() || '';
+  if (!text) { toast('Bitte Text eingeben!'); return; }
+
+  initFirebase();
+  var fbPath = 'notes/' + encodeURIComponent(exName).replace(/\./g, '_');
+
+  var newNote = {
+    text: text,
+    author: currentUser,
+    timestamp: Date.now()
+  };
+
+  if (firebaseDB) {
+    firebaseDB.ref(fbPath).once('value').then(function(snapshot) {
+      var existing = snapshot.val() || [];
+      var notes = Array.isArray(existing) ? existing : Object.values(existing || {});
+      notes.push(newNote);
+      firebaseDB.ref(fbPath).set(notes).then(function() {
+        closeModal();
+        toast('Notiz gespeichert!');
+        renderExercises();
+      });
+    }).catch(function() {
+      var notesKey = 'exnotes_' + exName;
+      saveGlobal(notesKey, text);
+      closeModal();
+      toast('Notiz lokal gespeichert!');
+      renderExercises();
+    });
   } else {
-    localStorage.removeItem(key(notesKey));
+    var notesKey = 'exnotes_' + exName;
+    saveGlobal(notesKey, text);
+    closeModal();
+    toast('Notiz lokal gespeichert!');
+    renderExercises();
   }
-  closeModal();
-  toast('Notizen gespeichert!');
-  renderExercises();
 }
 
 function finishWorkout() {
@@ -5463,6 +5549,32 @@ const EQUIP_DE = {
   'upper body ergometer': 'Armergometer'
 };
 
+const EXERCISE_NAME_MAP = {
+  'kniebeuge': 'squat', 'bankdrücken': 'bench press', 'kreuzheben': 'deadlift',
+  'rudern': 'row', 'latziehen': 'lat pulldown', 'schulterdrücken': 'overhead press',
+  'seitheben': 'lateral raise', 'bizeps': 'bicep curl', 'trizeps': 'tricep',
+  'beinpresse': 'leg press', 'beinbeuger': 'leg curl', 'beinstrecker': 'leg extension',
+  'wadenheben': 'calf raise', 'brustpresse': 'chest press', 'butterfly': 'chest fly',
+  'klimmzug': 'pull up', 'dip': 'dip', 'ausfallschritt': 'lunge',
+  'hip thrust': 'hip thrust', 'rdl': 'romanian deadlift', 'hack squat': 'hack squat',
+  'frontheben': 'front raise', 'face pull': 'face pull', 'shrug': 'shrug',
+  'plank': 'plank', 'crunch': 'crunch', 'bauchpresse': 'ab crunch',
+  'kabelzug': 'cable', 'hammercurl': 'hammer curl', 'schrägbank': 'incline bench',
+  'flachbank': 'flat bench', 'cable fly': 'cable fly', 'reverse fly': 'reverse fly'
+};
+
+function translateExerciseName(name) {
+  var lower = name.toLowerCase();
+  for (var de in EXERCISE_NAME_MAP) {
+    if (lower.includes(de)) return EXERCISE_NAME_MAP[de];
+  }
+  var cleaned = lower.replace(/\s*\(.*?\)\s*/g, '').trim();
+  for (var de2 in EXERCISE_NAME_MAP) {
+    if (cleaned.includes(de2)) return EXERCISE_NAME_MAP[de2];
+  }
+  return name;
+}
+
 const BODY_REGION_MAP = {
   'Oberkörper': ['chest', 'back', 'shoulders', 'upper arms', 'lower arms', 'neck'],
   'Unterkörper': ['upper legs', 'lower legs'],
@@ -5740,64 +5852,61 @@ function updateEdbBreadcrumb() {
 let swapContext = null;
 
 function openSwapOverlay(workoutName, exerciseIndex) {
-  const p = plan();
-  const exercises = p.workouts[workoutName];
-  const ex = exercises[exerciseIndex];
+  var p = plan();
+  var exercises = p.workouts[workoutName];
+  var ex = exercises[exerciseIndex];
   swapContext = { workoutName: workoutName, exerciseIndex: exerciseIndex, originalExercise: ex };
 
   document.getElementById('swapTitle').textContent = 'Ersatz für: ' + ex.name;
   document.getElementById('swapOverlay').classList.add('open');
 
-  const body = document.getElementById('swapBody');
-  body.innerHTML = '<div class="edb-loading">Suche Alternativen...</div>';
+  var body = document.getElementById('swapBody');
+  var html = '<div class="edb-search-wrap">' +
+    '<div class="edb-search-icon">\uD83D\uDD0D</div>' +
+    '<input type="text" class="edb-search-input" id="swapSearchInput" placeholder="Übung suchen..." autocomplete="off" oninput="onSwapSearchInput(this.value)"/>' +
+  '</div>';
+  html += '<div id="swapSearchResults"></div>';
+  html += '<div id="swapSuggestions"><div class="edb-loading">Suche Alternativen...</div></div>';
+  html += '<div id="swapCategoryBrowser"></div>';
+  body.innerHTML = html;
 
   fetchSwapAlternatives(ex.name);
+  renderSwapCategories();
 }
 
-async function fetchSwapAlternatives(exerciseName) {
-  const body = document.getElementById('swapBody');
-
-  const searchData = await edbFetch('/exercises/search?q=' + encodeURIComponent(exerciseName) + '&offset=0&limit=5');
-
-  let targetMuscle = null;
-  let equipment = null;
-  if (searchData && searchData.length > 0) {
-    const match = searchData[0];
-    targetMuscle = match.targetMuscles && match.targetMuscles[0];
-    equipment = match.equipments && match.equipments[0];
-  }
-
-  if (!targetMuscle) {
-    const keyword = exerciseName.split(/[\s(]/)[0];
-    const fallbackData = await edbFetch('/exercises/search?q=' + encodeURIComponent(keyword) + '&offset=0&limit=20');
-    if (fallbackData && fallbackData.length > 0) {
-      renderSwapResults(fallbackData);
-    } else {
-      body.innerHTML = '<div class="edb-empty">Keine Alternativen gefunden.</div>';
-    }
+var swapSearchTimer = null;
+function onSwapSearchInput(val) {
+  clearTimeout(swapSearchTimer);
+  var suggestionsEl = document.getElementById('swapSuggestions');
+  var catEl = document.getElementById('swapCategoryBrowser');
+  if (!val || val.length < 2) {
+    document.getElementById('swapSearchResults').innerHTML = '';
+    if (suggestionsEl) suggestionsEl.style.display = '';
+    if (catEl) catEl.style.display = '';
     return;
   }
-
-  const muscleData = await edbFetch('/muscles/' + encodeURIComponent(targetMuscle) + '/exercises?offset=0&limit=30');
-  if (muscleData && muscleData.length > 0) {
-    const sorted = muscleData.slice().sort(function(a, b) {
-      const aMatch = (a.equipments && a.equipments.includes(equipment)) ? 0 : 1;
-      const bMatch = (b.equipments && b.equipments.includes(equipment)) ? 0 : 1;
-      return aMatch - bMatch;
-    });
-    renderSwapResults(sorted);
-  } else {
-    body.innerHTML = '<div class="edb-empty">Keine Alternativen gefunden.</div>';
-  }
+  if (suggestionsEl) suggestionsEl.style.display = 'none';
+  if (catEl) catEl.style.display = 'none';
+  swapSearchTimer = setTimeout(function() { swapSearch(val); }, 400);
 }
 
-function renderSwapResults(exercises) {
-  const body = document.getElementById('swapBody');
-  let html = '<div style="font-size:12px;color:var(--ink-muted);margin-bottom:12px;">Tippe auf eine Übung, um sie einzutauschen:</div>';
+async function swapSearch(query) {
+  var resultsEl = document.getElementById('swapSearchResults');
+  resultsEl.innerHTML = '<div class="edb-loading">Suche...</div>';
+  var data = await edbFetch('/exercises/search?q=' + encodeURIComponent(query) + '&offset=0&limit=20');
+  if (!data || data.length === 0) {
+    resultsEl.innerHTML = '<div class="edb-empty">Keine Ergebnisse für "' + escapeHtml(query) + '"</div>';
+    return;
+  }
+  renderSwapResultsInto(resultsEl, data);
+}
+
+function renderSwapResultsInto(container, exercises) {
+  var html = '<div style="font-size:12px;color:var(--ink-muted);margin-bottom:8px;">Tippe auf eine Übung zum Tauschen:</div>';
   html += '<div class="edb-exercise-list">';
   exercises.forEach(function(ex) {
-    const muscles = (ex.targetMuscles || []).map(m => deMuscleName(m)).join(', ');
-    const equip = (ex.equipments || []).map(e => deEquip(e)).join(', ');
+    var muscles = (ex.targetMuscles || []).map(function(m) { return deMuscleName(m); }).join(', ');
+    var equip = (ex.equipments || []).map(function(e) { return deEquip(e); }).join(', ');
     edbCache['_ex_' + ex.exerciseId] = ex;
     html += '<div class="edb-ex-card" onclick="confirmSwapExercise(\'' + ex.exerciseId + '\')">' +
       '<img class="edb-ex-gif" src="' + ex.gifUrl + '" loading="lazy" alt="' + escapeHtml(ex.name) + '" onerror="this.src=\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 72 72%22><rect fill=%22%23111128%22 width=%2272%22 height=%2272%22/><text x=%2236%22 y=%2240%22 text-anchor=%22middle%22 fill=%22%2364748b%22 font-size=%2220%22>\uD83C\uDFCB\uFE0F</text></svg>\'"/>' +
@@ -5809,7 +5918,112 @@ function renderSwapResults(exercises) {
     '</div>';
   });
   html += '</div>';
-  body.innerHTML = html;
+  container.innerHTML = html;
+}
+
+async function fetchSwapAlternatives(exerciseName) {
+  var suggestionsEl = document.getElementById('swapSuggestions');
+  if (!suggestionsEl) return;
+
+  var translatedName = translateExerciseName(exerciseName);
+  var searchData = await edbFetch('/exercises/search?q=' + encodeURIComponent(translatedName) + '&offset=0&limit=5');
+
+  var targetMuscle = null;
+  var equipment = null;
+  if (searchData && searchData.length > 0) {
+    var match = searchData[0];
+    targetMuscle = match.targetMuscles && match.targetMuscles[0];
+    equipment = match.equipments && match.equipments[0];
+  }
+
+  if (!targetMuscle) {
+    var keyword = translatedName.split(/[\s(]/)[0];
+    var fallbackData = await edbFetch('/exercises/search?q=' + encodeURIComponent(keyword) + '&offset=0&limit=20');
+    if (fallbackData && fallbackData.length > 0) {
+      suggestionsEl.innerHTML = '<div class="section-label">Vorschläge</div>';
+      renderSwapResultsInto(suggestionsEl, fallbackData);
+    } else {
+      suggestionsEl.innerHTML = '<div class="section-label">Vorschläge</div><div class="edb-empty">Keine automatischen Vorschläge. Nutze die Suche oder Kategorien.</div>';
+    }
+    return;
+  }
+
+  var muscleData = await edbFetch('/muscles/' + encodeURIComponent(targetMuscle) + '/exercises?offset=0&limit=30');
+  if (muscleData && muscleData.length > 0) {
+    var sorted = muscleData.slice().sort(function(a, b) {
+      var aMatch = (a.equipments && a.equipments.includes(equipment)) ? 0 : 1;
+      var bMatch = (b.equipments && b.equipments.includes(equipment)) ? 0 : 1;
+      return aMatch - bMatch;
+    });
+    suggestionsEl.innerHTML = '<div class="section-label">Vorschläge für ' + deMuscleName(targetMuscle) + '</div>';
+    renderSwapResultsInto(suggestionsEl, sorted);
+  } else {
+    suggestionsEl.innerHTML = '<div class="section-label">Vorschläge</div><div class="edb-empty">Keine automatischen Vorschläge. Nutze die Suche oder Kategorien.</div>';
+  }
+}
+
+function renderSwapCategories() {
+  var container = document.getElementById('swapCategoryBrowser');
+  if (!container) return;
+  var html = '<div class="section-label" style="margin-top:16px;">Alle Kategorien</div>';
+  html += '<div class="edb-categories">';
+  for (var region in BODY_REGION_MAP) {
+    html += '<button class="edb-cat-card" onclick="renderSwapRegion(\'' + region + '\')">' +
+      '<div class="edb-cat-icon">' + BODY_REGION_ICONS[region] + '</div>' +
+      '<div class="edb-cat-name">' + region + '</div>' +
+    '</button>';
+  }
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function renderSwapRegion(region) {
+  var container = document.getElementById('swapCategoryBrowser');
+  if (!container) return;
+  var suggestionsEl = document.getElementById('swapSuggestions');
+  if (suggestionsEl) suggestionsEl.style.display = 'none';
+
+  var parts = BODY_REGION_MAP[region];
+  var html = '<div style="margin-bottom:8px;"><button class="ex-footer-btn" onclick="renderSwapCategories(); var s=document.getElementById(\'swapSuggestions\'); if(s) s.style.display=\'\';">← Kategorien</button></div>';
+  html += '<div class="edb-muscle-list">';
+  parts.forEach(function(part) {
+    html += '<button class="edb-muscle-btn" onclick="renderSwapBodyPart(\'' + part + '\',\'' + region + '\')">' +
+      '<span>' + deBodyPart(part) + '</span>' +
+      '<span class="arrow">›</span>' +
+    '</button>';
+  });
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+async function renderSwapBodyPart(part, region) {
+  var container = document.getElementById('swapCategoryBrowser');
+  if (!container) return;
+  container.innerHTML = '<div style="margin-bottom:8px;"><button class="ex-footer-btn" onclick="renderSwapRegion(\'' + region + '\')">← ' + deBodyPart(part) + '</button></div><div class="edb-loading">Lade Übungen...</div>';
+
+  var data = await edbFetch('/bodyparts/' + encodeURIComponent(part) + '/exercises?offset=0&limit=100');
+  if (!data || data.length === 0) {
+    container.innerHTML += '<div class="edb-empty">Keine Übungen gefunden.</div>';
+    return;
+  }
+
+  var html = '<div style="margin-bottom:8px;"><button class="ex-footer-btn" onclick="renderSwapRegion(\'' + region + '\')">← ' + deBodyPart(part) + '</button></div>';
+  html += '<div class="edb-exercise-list">';
+  data.forEach(function(ex) {
+    edbCache['_ex_' + ex.exerciseId] = ex;
+    var muscles = (ex.targetMuscles || []).map(function(m) { return deMuscleName(m); }).join(', ');
+    var equip = (ex.equipments || []).map(function(e) { return deEquip(e); }).join(', ');
+    html += '<div class="edb-ex-card" onclick="confirmSwapExercise(\'' + ex.exerciseId + '\')">' +
+      '<img class="edb-ex-gif" src="' + ex.gifUrl + '" loading="lazy" alt="' + escapeHtml(ex.name) + '" onerror="this.src=\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 72 72%22><rect fill=%22%23111128%22 width=%2272%22 height=%2272%22/><text x=%2236%22 y=%2240%22 text-anchor=%22middle%22 fill=%22%2364748b%22 font-size=%2220%22>\uD83C\uDFCB\uFE0F</text></svg>\'"/>' +
+      '<div class="edb-ex-info">' +
+        '<div class="edb-ex-name">' + escapeHtml(ex.name) + '</div>' +
+        '<div class="edb-ex-muscles">' + escapeHtml(muscles) + '</div>' +
+        '<div class="edb-ex-tags">' + (equip ? '<span class="edb-ex-tag">' + escapeHtml(equip) + '</span>' : '') + '</div>' +
+      '</div>' +
+    '</div>';
+  });
+  html += '</div>';
+  container.innerHTML = html;
 }
 
 function confirmSwapExercise(exerciseId) {
@@ -5873,11 +6087,15 @@ function renderPlanBuilderContent() {
   const body = document.getElementById('planBuilderBody');
 
   if (planBuilderAddMode) {
-    body.innerHTML = '<div class="edb-search-wrap">' +
+    var addHtml = '<div style="margin-bottom:12px;"><button class="ex-footer-btn" onclick="planBuilderAddMode=false;renderPlanBuilderContent()">← Zurück zum Plan</button></div>';
+    addHtml += '<div class="edb-search-wrap">' +
       '<div class="edb-search-icon">\uD83D\uDD0D</div>' +
       '<input type="text" class="edb-search-input" id="pbSearchInput" placeholder="Übung suchen..." autocomplete="off" oninput="onPbSearchInput(this.value)"/>' +
-    '</div>' +
-    '<div id="pbSearchResults"></div>';
+    '</div>';
+    addHtml += '<div id="pbSearchResults"></div>';
+    addHtml += '<div id="pbCategoryBrowser"></div>';
+    body.innerHTML = addHtml;
+    renderPbCategories();
     setTimeout(function() { var el = document.getElementById('pbSearchInput'); if (el) el.focus(); }, 300);
     return;
   }
@@ -5941,13 +6159,78 @@ function startPbAddMode() {
   renderPlanBuilderContent();
 }
 
-let pbSearchTimer = null;
-function onPbSearchInput(val) {
-  clearTimeout(pbSearchTimer);
-  if (!val || val.length < 2) {
-    document.getElementById('pbSearchResults').innerHTML = '';
+function renderPbCategories() {
+  var container = document.getElementById('pbCategoryBrowser');
+  if (!container) return;
+  var html = '<div class="section-label" style="margin-top:8px;">Oder nach Kategorie durchsuchen</div>';
+  html += '<div class="edb-categories">';
+  for (var region in BODY_REGION_MAP) {
+    html += '<button class="edb-cat-card" onclick="renderPbRegion(\'' + region + '\')">' +
+      '<div class="edb-cat-icon">' + BODY_REGION_ICONS[region] + '</div>' +
+      '<div class="edb-cat-name">' + region + '</div>' +
+    '</button>';
+  }
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function renderPbRegion(region) {
+  var container = document.getElementById('pbCategoryBrowser');
+  if (!container) return;
+  var parts = BODY_REGION_MAP[region];
+  var html = '<div style="margin-bottom:8px;"><button class="ex-footer-btn" onclick="renderPbCategories()">← ' + region + '</button></div>';
+  html += '<div class="edb-muscle-list">';
+  parts.forEach(function(part) {
+    html += '<button class="edb-muscle-btn" onclick="renderPbBodyPart(\'' + part + '\',\'' + region + '\')">' +
+      '<span>' + deBodyPart(part) + '</span>' +
+      '<span class="arrow">›</span>' +
+    '</button>';
+  });
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+async function renderPbBodyPart(part, region) {
+  var container = document.getElementById('pbCategoryBrowser');
+  if (!container) return;
+  container.innerHTML = '<div style="margin-bottom:8px;"><button class="ex-footer-btn" onclick="renderPbRegion(\'' + region + '\')">← ' + deBodyPart(part) + '</button></div><div class="edb-loading">Lade Übungen...</div>';
+
+  var data = await edbFetch('/bodyparts/' + encodeURIComponent(part) + '/exercises?offset=0&limit=100');
+  if (!data || data.length === 0) {
+    container.innerHTML += '<div class="edb-empty">Keine Übungen gefunden.</div>';
     return;
   }
+
+  var html = '<div style="margin-bottom:8px;"><button class="ex-footer-btn" onclick="renderPbRegion(\'' + region + '\')">← ' + deBodyPart(part) + '</button></div>';
+  html += '<div class="edb-exercise-list">';
+  data.forEach(function(ex) {
+    edbCache['_ex_' + ex.exerciseId] = ex;
+    var muscles = (ex.targetMuscles || []).map(function(m) { return deMuscleName(m); }).join(', ');
+    var equip = (ex.equipments || []).map(function(e) { return deEquip(e); }).join(', ');
+    html += '<div class="edb-ex-card" onclick="addExerciseToPlanBuilder(\'' + ex.exerciseId + '\')">' +
+      '<img class="edb-ex-gif" src="' + ex.gifUrl + '" loading="lazy" alt="' + escapeHtml(ex.name) + '" onerror="this.src=\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 72 72%22><rect fill=%22%23111128%22 width=%2272%22 height=%2272%22/><text x=%2236%22 y=%2240%22 text-anchor=%22middle%22 fill=%22%2364748b%22 font-size=%2220%22>\uD83C\uDFCB\uFE0F</text></svg>\'"/>' +
+      '<div class="edb-ex-info">' +
+        '<div class="edb-ex-name">' + escapeHtml(ex.name) + '</div>' +
+        '<div class="edb-ex-muscles">' + escapeHtml(muscles) + '</div>' +
+        '<div class="edb-ex-tags">' + (equip ? '<span class="edb-ex-tag">' + escapeHtml(equip) + '</span>' : '') + '</div>' +
+      '</div>' +
+      '<div style="color:var(--green);font-size:20px;padding:4px;">+</div>' +
+    '</div>';
+  });
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+var pbSearchTimer = null;
+function onPbSearchInput(val) {
+  clearTimeout(pbSearchTimer);
+  var catEl = document.getElementById('pbCategoryBrowser');
+  if (!val || val.length < 2) {
+    document.getElementById('pbSearchResults').innerHTML = '';
+    if (catEl) catEl.style.display = '';
+    return;
+  }
+  if (catEl) catEl.style.display = 'none';
   pbSearchTimer = setTimeout(function() { pbSearch(val); }, 400);
 }
 
