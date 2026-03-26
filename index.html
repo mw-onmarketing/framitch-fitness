@@ -343,7 +343,7 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
   position: relative;
 }
 .nav-btn:active { transform: scale(0.9); }
-.nav-btn svg { width: 20px; height: 20px; fill: currentColor; transition: fill 0.2s; }
+.nav-btn svg { width: 18px; height: 18px; fill: currentColor; transition: fill 0.2s; }
 .nav-btn.active { color: var(--accent); font-weight: 700; }
 .nav-btn.active::after {
   content: '';
@@ -2159,6 +2159,172 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
 }
 .nutr-input-area.open { display: block; animation: fadeIn 0.25s ease both; }
 
+/* ==================== EXERCISE DATABASE ==================== */
+.edb-search-wrap { position: relative; margin-bottom: 16px; }
+.edb-search-input {
+  width: 100%; padding: 12px 14px 12px 40px;
+  background: var(--card); border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm); color: var(--ink); font-size: 15px;
+}
+.edb-search-input::placeholder { color: var(--ink-muted); }
+.edb-search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 16px; pointer-events: none; }
+.edb-search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(var(--accent-rgb),0.15); }
+
+.edb-breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink-muted); margin-bottom: 12px; flex-wrap: wrap; }
+.edb-breadcrumb button { color: var(--accent); font-weight: 600; font-size: 12px; text-decoration: underline; }
+.edb-breadcrumb .sep { opacity: 0.5; }
+
+.edb-categories { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.edb-cat-card {
+  background: var(--card); border: 1px solid var(--card-border);
+  border-radius: var(--radius); padding: 16px 14px; text-align: center;
+  transition: border-color 0.2s, background 0.2s;
+}
+.edb-cat-card:active { background: var(--card-hover); border-color: var(--accent); }
+.edb-cat-icon { font-size: 28px; margin-bottom: 6px; }
+.edb-cat-name { font-size: 13px; font-weight: 700; }
+.edb-cat-count { font-size: 11px; color: var(--ink-muted); margin-top: 2px; }
+
+.edb-muscle-list { display: flex; flex-direction: column; gap: 8px; }
+.edb-muscle-btn {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--card); border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm); padding: 14px 16px;
+  font-size: 14px; font-weight: 600; transition: border-color 0.2s;
+}
+.edb-muscle-btn:active { border-color: var(--accent); }
+.edb-muscle-btn .arrow { color: var(--ink-muted); font-size: 16px; }
+
+.edb-exercise-list { display: flex; flex-direction: column; gap: 10px; }
+.edb-ex-card {
+  display: flex; gap: 12px; background: var(--card);
+  border: 1px solid var(--card-border); border-radius: var(--radius);
+  padding: 12px; transition: border-color 0.2s; align-items: flex-start;
+}
+.edb-ex-card:active { border-color: var(--accent); }
+.edb-ex-gif {
+  width: 72px; height: 72px; border-radius: var(--radius-xs);
+  object-fit: cover; background: var(--bg-elevated); flex-shrink: 0;
+}
+.edb-ex-info { flex: 1; min-width: 0; }
+.edb-ex-name { font-size: 13px; font-weight: 700; line-height: 1.3; text-transform: capitalize; }
+.edb-ex-muscles { font-size: 11px; color: var(--ink-muted); margin-top: 3px; }
+.edb-ex-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.edb-ex-tag {
+  font-size: 10px; font-weight: 600; padding: 2px 8px;
+  border-radius: 20px; background: rgba(var(--accent-rgb),0.1);
+  color: var(--accent);
+}
+.edb-ex-fav {
+  font-size: 18px; padding: 4px; flex-shrink: 0; opacity: 0.4;
+  transition: opacity 0.2s;
+}
+.edb-ex-fav.active { opacity: 1; }
+
+.edb-detail-gif {
+  width: 100%; max-height: 300px; object-fit: contain;
+  border-radius: var(--radius); background: var(--bg-elevated);
+  margin-bottom: 16px;
+}
+.edb-detail-section { margin-bottom: 16px; }
+.edb-detail-label { font-size: 11px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+.edb-detail-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.edb-detail-tag {
+  font-size: 12px; font-weight: 600; padding: 4px 12px;
+  border-radius: 20px; background: rgba(var(--accent-rgb),0.1); color: var(--accent);
+}
+.edb-detail-tag.secondary { background: rgba(var(--green-rgb),0.1); color: var(--green); }
+.edb-detail-tag.equip { background: rgba(var(--amber-rgb),0.1); color: var(--amber); }
+.edb-instruction { display: flex; gap: 10px; margin-bottom: 10px; font-size: 13px; line-height: 1.5; }
+.edb-instruction-num {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: rgba(var(--accent-rgb),0.15); color: var(--accent);
+  font-size: 11px; font-weight: 700; display: flex;
+  align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;
+}
+.edb-detail-actions { display: flex; gap: 8px; margin-top: 16px; }
+.edb-detail-actions .btn-primary { flex: 1; font-size: 13px; padding: 10px; }
+
+.edb-loading { text-align: center; padding: 40px 20px; color: var(--ink-muted); font-size: 13px; }
+.edb-loading::after { content: ''; display: block; width: 24px; height: 24px; border: 2px solid var(--card-border); border-top-color: var(--accent); border-radius: 50%; margin: 12px auto 0; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.edb-empty { text-align: center; padding: 40px 20px; color: var(--ink-muted); font-size: 13px; }
+
+.edb-filter-row { display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
+.edb-filter-btn {
+  flex-shrink: 0; font-size: 12px; font-weight: 600;
+  padding: 6px 14px; border-radius: 20px;
+  background: var(--card); border: 1px solid var(--card-border);
+  color: var(--ink-secondary); transition: all 0.2s; white-space: nowrap;
+}
+.edb-filter-btn.active { background: rgba(var(--accent-rgb),0.15); border-color: var(--accent); color: var(--accent); }
+
+/* ==================== SWAP OVERLAY ==================== */
+.swap-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: var(--bg); z-index: 200; display: none;
+  flex-direction: column; overflow: hidden;
+}
+.swap-overlay.open { display: flex; }
+.swap-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 20px; border-bottom: 1px solid var(--line);
+}
+.swap-header button { font-size: 20px; }
+.swap-header h3 { font-size: 15px; font-weight: 700; flex: 1; }
+.swap-body { flex: 1; overflow-y: auto; padding: 16px 20px; -webkit-overflow-scrolling: touch; }
+
+/* ==================== PLAN BUILDER ==================== */
+.plan-builder-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: var(--bg); z-index: 200; display: none;
+  flex-direction: column; overflow: hidden;
+}
+.plan-builder-overlay.open { display: flex; }
+.plan-builder-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 20px; border-bottom: 1px solid var(--line);
+}
+.plan-builder-header button { font-size: 20px; }
+.plan-builder-header h3 { font-size: 15px; font-weight: 700; flex: 1; }
+.plan-builder-body { flex: 1; overflow-y: auto; padding: 16px 20px; -webkit-overflow-scrolling: touch; }
+.plan-builder-item {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--card); border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm); padding: 12px; margin-bottom: 8px;
+}
+.plan-builder-item .item-info { flex: 1; }
+.plan-builder-item .item-name { font-size: 13px; font-weight: 700; text-transform: capitalize; }
+.plan-builder-item .item-meta { font-size: 11px; color: var(--ink-muted); margin-top: 2px; }
+.plan-builder-item .item-config { display: flex; gap: 6px; align-items: center; }
+.plan-builder-item .item-config input { width: 50px; text-align: center; padding: 6px; font-size: 13px; }
+.plan-builder-item .item-remove { color: var(--red); font-size: 16px; padding: 4px 8px; }
+.plan-builder-item .item-move { color: var(--ink-muted); font-size: 14px; padding: 4px; }
+.plan-builder-footer {
+  padding: 16px 20px; border-top: 1px solid var(--line);
+  display: flex; gap: 10px;
+}
+.plan-builder-footer .btn-primary { flex: 1; }
+
+.custom-plans-section { margin-top: 16px; }
+.custom-plan-card {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--card); border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm); padding: 14px 16px; margin-bottom: 8px;
+}
+.custom-plan-card .plan-name { font-size: 14px; font-weight: 700; }
+.custom-plan-card .plan-meta { font-size: 11px; color: var(--ink-muted); margin-top: 2px; }
+.custom-plan-card .plan-actions { display: flex; gap: 8px; }
+.custom-plan-card .plan-action-btn {
+  font-size: 11px; font-weight: 600; padding: 4px 10px;
+  border-radius: 6px; background: rgba(var(--accent-rgb),0.08); color: var(--accent);
+}
+.custom-plan-card .plan-delete-btn {
+  font-size: 11px; font-weight: 600; padding: 4px 10px;
+  border-radius: 6px; background: rgba(var(--red-rgb),0.08); color: var(--red);
+}
+
 /* ==================== RESPONSIVE ==================== */
 @media (min-width: 500px) {
   .page { padding: 0 24px 24px; max-width: 500px; margin: 0 auto; }
@@ -2270,6 +2436,16 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
     <div class="glass-card">
       <div id="workoutHistory"></div>
     </div>
+  </div>
+
+  <!-- ÜBUNGEN DATABASE -->
+  <div id="pageExerciseDB" class="page">
+    <div class="edb-search-wrap">
+      <div class="edb-search-icon">&#x1F50D;</div>
+      <input type="text" class="edb-search-input" id="edbSearchInput" placeholder="Übung suchen..." autocomplete="off" oninput="onEdbSearchInput(this.value)"/>
+    </div>
+    <div id="edbBreadcrumb"></div>
+    <div id="edbContent"></div>
   </div>
 
   <!-- GEWICHT -->
@@ -2450,6 +2626,10 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
       <svg viewBox="0 0 24 24"><path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 2.71 2.71 4.14l1.43 1.43L2 7.71l1.43 1.43L2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22l1.43-1.43 1.43 1.43 2.14-2.14 1.43 1.43 1.43-1.43-1.43-1.43L22 16.29z"/></svg>
       <span>Training</span>
     </button>
+    <button class="nav-btn" onclick="showPage('ExerciseDB')" data-page="ExerciseDB">
+      <svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z"/></svg>
+      <span>Übungen</span>
+    </button>
     <button class="nav-btn" onclick="showPage('Weight')" data-page="Weight">
       <svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9zm0 16c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7zm1-11h-2v3H8v2h3v3h2v-3h3v-2h-3V8z"/></svg>
       <span>Gewicht</span>
@@ -2472,6 +2652,27 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
       <span>Mehr</span>
     </button>
   </nav>
+</div>
+
+<!-- SWAP EXERCISE OVERLAY -->
+<div class="swap-overlay" id="swapOverlay">
+  <div class="swap-header">
+    <button onclick="closeSwapOverlay()">&#x2190;</button>
+    <h3 id="swapTitle">Übung tauschen</h3>
+  </div>
+  <div class="swap-body" id="swapBody"></div>
+</div>
+
+<!-- PLAN BUILDER OVERLAY -->
+<div class="plan-builder-overlay" id="planBuilderOverlay">
+  <div class="plan-builder-header">
+    <button onclick="closePlanBuilder()">&#x2190;</button>
+    <h3 id="planBuilderTitle">Neuer Trainingsplan</h3>
+  </div>
+  <div class="plan-builder-body" id="planBuilderBody"></div>
+  <div class="plan-builder-footer">
+    <button class="btn-primary" onclick="savePlanFromBuilder()">Plan speichern</button>
+  </div>
 </div>
 
 <!-- FAB -->
@@ -2761,6 +2962,7 @@ function switchProfile() {
 // ==================== INIT ====================
 function init() {
   migrateOldFoodData();
+  loadCustomPlansIntoMemory();
   updateHeaderDate();
   showPage('Dashboard');
   // Initialize Firebase for chat unread badge
@@ -2810,7 +3012,7 @@ function showPage(name) {
   });
 
   const titles = {
-    Dashboard: 'Dashboard', Training: 'Training', Weight: 'Gewicht',
+    Dashboard: 'Dashboard', Training: 'Training', ExerciseDB: 'Übungen', Weight: 'Gewicht',
     Nutrition: 'Ernährung', Supps: 'Supplements', Chat: 'Chat', Settings: 'Mehr'
   };
   document.getElementById('pageTitle').textContent = titles[name] || name;
@@ -2840,6 +3042,7 @@ function showPage(name) {
   if (name === 'Supps') renderSupps();
   if (name === 'Chat') renderChat();
   if (name === 'Settings') renderSettings();
+  if (name === 'ExerciseDB') renderExerciseDB();
 }
 
 // ==================== DASHBOARD ====================
@@ -2999,7 +3202,7 @@ function renderTraining() {
   wks.forEach(w => {
     html += `<button class="workout-tab ${w === selectedWorkout ? 'active' : ''}" onclick="selectWorkout('${w.replace(/'/g, "\\'")}')">${w}</button>`;
   });
-  document.getElementById('workoutSelect').innerHTML = html;
+  document.getElementById('workoutSelect').innerHTML = html + '<button class="workout-tab" onclick="openPlanBuilder()" style="opacity:0.6;border-style:dashed;">+ Neuer Plan</button>';
 
   renderWarmup();
   renderExercises();
@@ -3093,6 +3296,7 @@ function renderExercises() {
       <button class="ex-footer-btn" onclick="showExHistory('${exNameSafe}')">\uD83D\uDCDC Verlauf</button>
       <button class="ex-footer-btn" onclick="showExNotes('${exNameSafe}')">\uD83D\uDCDD Notizen</button>
       <button class="ex-footer-btn" onclick="startTimer(${ex.anchor ? 180 : 90},'${ex.anchor ? 'Anker-Pause' : 'Pause'}')">\u23F1 Timer</button>
+      <button class="ex-footer-btn" onclick="openSwapOverlay('${selectedWorkout.replace(/'/g, "\\'")}',${ei})">\uD83D\uDD04 Tauschen</button>
     </div></div>`;
   });
 
@@ -5208,6 +5412,680 @@ function renderDashStepsWithGfit() {
       <button onclick="promptSteps()" style="margin-top:6px;font-size:12px;font-weight:600;color:var(--accent);padding:4px 8px;border-radius:6px;background:rgba(var(--accent-rgb),0.08);">Schritte eintragen</button>
     </div>
   `;
+}
+
+// ==================== EXERCISE DATABASE ====================
+const EDB_BASE = 'https://www.exercisedb.dev/api/v1';
+const edbCache = {};
+let edbSearchTimer = null;
+let edbNavStack = [];
+
+const BODY_PARTS_DE = {
+  'chest': 'Brust', 'back': 'Rücken', 'shoulders': 'Schultern',
+  'upper arms': 'Oberarme', 'lower arms': 'Unterarme', 'neck': 'Nacken',
+  'upper legs': 'Oberschenkel', 'lower legs': 'Unterschenkel',
+  'waist': 'Core / Bauch', 'cardio': 'Cardio'
+};
+
+const MUSCLES_DE = {
+  'triceps': 'Trizeps', 'biceps': 'Bizeps', 'chest': 'Brust',
+  'pectorals': 'Brustmuskel', 'quadriceps': 'Quadrizeps', 'quads': 'Quadrizeps',
+  'hamstrings': 'Beinbeuger', 'glutes': 'Gesäß', 'calves': 'Waden',
+  'lats': 'Latissimus', 'latissimus dorsi': 'Latissimus', 'deltoids': 'Deltamuskeln',
+  'delts': 'Deltamuskeln', 'traps': 'Trapez', 'trapezius': 'Trapez',
+  'abs': 'Bauchmuskeln', 'abdominals': 'Bauchmuskeln', 'obliques': 'Schräge Bauchm.',
+  'forearms': 'Unterarme', 'lower back': 'Unterer Rücken', 'upper back': 'Oberer Rücken',
+  'shoulders': 'Schultern', 'core': 'Core', 'rear deltoids': 'Hintere Schulter',
+  'upper chest': 'Obere Brust', 'lower abs': 'Untere Bauchmuskeln',
+  'hip flexors': 'Hüftbeuger', 'adductors': 'Adduktoren', 'abductors': 'Abduktoren',
+  'rhomboids': 'Rhomboideus', 'serratus anterior': 'Serratus', 'rotator cuff': 'Rotatorenmansch.',
+  'groin': 'Leiste', 'inner thighs': 'Innere Oberschenkel',
+  'cardiovascular system': 'Herz-Kreislauf', 'spine': 'Wirbelsäule',
+  'brachialis': 'Brachialis', 'wrist flexors': 'Handgelenkbeuger',
+  'wrist extensors': 'Handgelenkstrecker', 'wrists': 'Handgelenke',
+  'ankles': 'Knöchel', 'feet': 'Füße', 'hands': 'Hände', 'shins': 'Schienbeine',
+  'soleus': 'Schollenmuskel', 'levator scapulae': 'Schulterheber',
+  'ankle stabilizers': 'Knöchelstabilisatoren', 'grip muscles': 'Griffmuskulatur',
+  'back': 'Rücken', 'sternocleidomastoid': 'Kopfwender'
+};
+
+const EQUIP_DE = {
+  'barbell': 'Langhantel', 'dumbbell': 'Kurzhantel', 'cable': 'Kabelzug',
+  'body weight': 'Körpergewicht', 'leverage machine': 'Maschine', 'smith machine': 'Multipresse',
+  'resistance band': 'Widerstandsband', 'band': 'Band', 'kettlebell': 'Kettlebell',
+  'medicine ball': 'Medizinball', 'stability ball': 'Gymnastikball', 'ez barbell': 'SZ-Stange',
+  'olympic barbell': 'Olympia-Hantel', 'rope': 'Seil', 'roller': 'Rolle',
+  'wheel roller': 'Ab-Roller', 'trap bar': 'Trap Bar', 'bosu ball': 'Bosu Ball',
+  'assisted': 'Assistiert', 'weighted': 'Gewichtet', 'hammer': 'Hammer',
+  'sled machine': 'Schlittenmaschine', 'tire': 'Reifen',
+  'stationary bike': 'Ergometer', 'elliptical machine': 'Crosstrainer',
+  'stepmill machine': 'Stepper', 'skierg machine': 'SkiErg',
+  'upper body ergometer': 'Armergometer'
+};
+
+const BODY_REGION_MAP = {
+  'Oberkörper': ['chest', 'back', 'shoulders', 'upper arms', 'lower arms', 'neck'],
+  'Unterkörper': ['upper legs', 'lower legs'],
+  'Core': ['waist'],
+  'Cardio': ['cardio']
+};
+
+const BODY_REGION_ICONS = {
+  'Oberkörper': '\uD83D\uDCAA', 'Unterkörper': '\uD83E\uDDB5', 'Core': '\uD83C\uDFAF', 'Cardio': '\u2764\uFE0F'
+};
+
+function deMuscleName(en) { return MUSCLES_DE[en] || en; }
+function deBodyPart(en) { return BODY_PARTS_DE[en] || en; }
+function deEquip(en) { return EQUIP_DE[en] || en; }
+
+async function edbFetch(path) {
+  if (edbCache[path]) return edbCache[path];
+  try {
+    const res = await fetch(EDB_BASE + path);
+    if (!res.ok) throw new Error('API error');
+    const json = await res.json();
+    const data = json.data || json;
+    edbCache[path] = data;
+    return data;
+  } catch (e) {
+    console.error('ExerciseDB fetch error:', e);
+    return null;
+  }
+}
+
+function getEdbFavorites() {
+  return JSON.parse(localStorage.getItem('edb_favorites') || '[]');
+}
+function toggleEdbFavorite(id) {
+  let favs = getEdbFavorites();
+  if (favs.includes(id)) favs = favs.filter(f => f !== id);
+  else favs.push(id);
+  localStorage.setItem('edb_favorites', JSON.stringify(favs));
+  return favs.includes(id);
+}
+
+// ---- RENDER: Main categories page ----
+function renderExerciseDB() {
+  edbNavStack = [];
+  document.getElementById('edbBreadcrumb').innerHTML = '';
+  document.getElementById('edbSearchInput').value = '';
+  renderEdbCategories();
+}
+
+function renderEdbCategories() {
+  const content = document.getElementById('edbContent');
+  let html = '<div class="edb-filter-row">';
+  html += '<button class="edb-filter-btn active" onclick="renderEdbCategories()">Kategorien</button>';
+  html += '<button class="edb-filter-btn" onclick="renderEdbFavorites()">&#x2B50; Favoriten</button>';
+  html += '</div>';
+  html += '<div class="edb-categories">';
+  for (const [region, parts] of Object.entries(BODY_REGION_MAP)) {
+    html += '<button class="edb-cat-card" onclick="renderEdbRegion(\'' + region + '\')">' +
+      '<div class="edb-cat-icon">' + BODY_REGION_ICONS[region] + '</div>' +
+      '<div class="edb-cat-name">' + region + '</div>' +
+      '<div class="edb-cat-count">' + parts.map(p => deBodyPart(p)).join(', ') + '</div>' +
+    '</button>';
+  }
+  html += '</div>';
+  content.innerHTML = html;
+  updateEdbBreadcrumb();
+}
+
+// ---- RENDER: Region -> body parts list ----
+function renderEdbRegion(region) {
+  edbNavStack = [{ type: 'region', label: region }];
+  const parts = BODY_REGION_MAP[region];
+  const content = document.getElementById('edbContent');
+  let html = '<div class="edb-muscle-list">';
+  parts.forEach(part => {
+    html += '<button class="edb-muscle-btn" onclick="renderEdbBodyPart(\'' + part + '\', \'' + region + '\')">' +
+      '<span>' + deBodyPart(part) + '</span>' +
+      '<span class="arrow">\u203A</span>' +
+    '</button>';
+  });
+  html += '</div>';
+  content.innerHTML = html;
+  updateEdbBreadcrumb();
+}
+
+// ---- RENDER: Body part -> exercises list ----
+async function renderEdbBodyPart(part, region) {
+  edbNavStack = [{ type: 'region', label: region }, { type: 'bodypart', label: deBodyPart(part), value: part }];
+  updateEdbBreadcrumb();
+  const content = document.getElementById('edbContent');
+  content.innerHTML = '<div class="edb-loading">Lade Übungen...</div>';
+
+  const data = await edbFetch('/bodyparts/' + encodeURIComponent(part) + '/exercises?offset=0&limit=100');
+  if (!data || data.length === 0) {
+    content.innerHTML = '<div class="edb-empty">Keine Übungen gefunden.</div>';
+    return;
+  }
+  // Cache exercises for detail view
+  data.forEach(ex => { edbCache['_ex_' + ex.exerciseId] = ex; });
+  renderEdbExerciseList(data);
+}
+
+// ---- RENDER: Exercise list (reusable) ----
+function renderEdbExerciseList(exercises) {
+  const content = document.getElementById('edbContent');
+  const favs = getEdbFavorites();
+  let html = '<div class="edb-exercise-list">';
+  exercises.forEach(ex => {
+    const isFav = favs.includes(ex.exerciseId);
+    const muscles = (ex.targetMuscles || []).map(m => deMuscleName(m)).join(', ');
+    const equip = (ex.equipments || []).map(e => deEquip(e)).join(', ');
+    html += '<div class="edb-ex-card" onclick="renderEdbDetail(\'' + ex.exerciseId + '\')">' +
+      '<img class="edb-ex-gif" src="' + ex.gifUrl + '" loading="lazy" alt="' + escapeHtml(ex.name) + '" onerror="this.src=\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 72 72%22><rect fill=%22%23111128%22 width=%2272%22 height=%2272%22/><text x=%2236%22 y=%2240%22 text-anchor=%22middle%22 fill=%22%2364748b%22 font-size=%2220%22>\uD83C\uDFCB\uFE0F</text></svg>\'"/>' +
+      '<div class="edb-ex-info">' +
+        '<div class="edb-ex-name">' + escapeHtml(ex.name) + '</div>' +
+        '<div class="edb-ex-muscles">' + escapeHtml(muscles) + '</div>' +
+        '<div class="edb-ex-tags">' + (equip ? '<span class="edb-ex-tag">' + escapeHtml(equip) + '</span>' : '') + '</div>' +
+      '</div>' +
+      '<button class="edb-ex-fav ' + (isFav ? 'active' : '') + '" onclick="event.stopPropagation(); onEdbFavClick(\'' + ex.exerciseId + '\', this)">' +
+        (isFav ? '\u2B50' : '\u2606') +
+      '</button>' +
+    '</div>';
+  });
+  html += '</div>';
+  content.innerHTML = html;
+}
+
+function onEdbFavClick(id, btn) {
+  const isFav = toggleEdbFavorite(id);
+  btn.classList.toggle('active', isFav);
+  btn.textContent = isFav ? '\u2B50' : '\u2606';
+}
+
+// ---- RENDER: Exercise detail ----
+async function renderEdbDetail(exerciseId) {
+  const content = document.getElementById('edbContent');
+  content.innerHTML = '<div class="edb-loading">Lade Details...</div>';
+
+  let ex = edbCache['_ex_' + exerciseId];
+  if (!ex) {
+    const data = await edbFetch('/exercises/' + exerciseId);
+    if (!data) { content.innerHTML = '<div class="edb-empty">Fehler beim Laden.</div>'; return; }
+    ex = Array.isArray(data) ? data[0] : data;
+    edbCache['_ex_' + exerciseId] = ex;
+  }
+
+  // Add detail to nav stack
+  const lastNav = edbNavStack[edbNavStack.length - 1];
+  if (!lastNav || lastNav.type !== 'detail') {
+    edbNavStack.push({ type: 'detail', label: ex.name });
+  }
+  updateEdbBreadcrumb();
+
+  const favs = getEdbFavorites();
+  const isFav = favs.includes(ex.exerciseId);
+  const targetMuscles = (ex.targetMuscles || []).map(m => '<span class="edb-detail-tag">' + escapeHtml(deMuscleName(m)) + '</span>').join('');
+  const secondaryMuscles = (ex.secondaryMuscles || []).map(m => '<span class="edb-detail-tag secondary">' + escapeHtml(deMuscleName(m)) + '</span>').join('');
+  const equips = (ex.equipments || []).map(e => '<span class="edb-detail-tag equip">' + escapeHtml(deEquip(e)) + '</span>').join('');
+
+  let instructionsHtml = '';
+  (ex.instructions || []).forEach((inst, i) => {
+    const text = inst.replace(/^Step:\d+\s*/i, '');
+    instructionsHtml += '<div class="edb-instruction">' +
+      '<div class="edb-instruction-num">' + (i + 1) + '</div>' +
+      '<div>' + escapeHtml(text) + '</div>' +
+    '</div>';
+  });
+
+  let html = '<img class="edb-detail-gif" src="' + ex.gifUrl + '" alt="' + escapeHtml(ex.name) + '" onerror="this.style.display=\'none\'"/>' +
+    '<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">' +
+      '<h3 style="font-size:17px; font-weight:800; text-transform:capitalize; flex:1;">' + escapeHtml(ex.name) + '</h3>' +
+      '<button class="edb-ex-fav ' + (isFav ? 'active' : '') + '" style="font-size:24px;" onclick="onEdbFavClick(\'' + ex.exerciseId + '\', this)">' + (isFav ? '\u2B50' : '\u2606') + '</button>' +
+    '</div>' +
+    '<div class="edb-detail-section">' +
+      '<div class="edb-detail-label">Zielmuskeln</div>' +
+      '<div class="edb-detail-tags">' + targetMuscles + '</div>' +
+    '</div>';
+  if (secondaryMuscles) {
+    html += '<div class="edb-detail-section">' +
+      '<div class="edb-detail-label">Sekundäre Muskeln</div>' +
+      '<div class="edb-detail-tags">' + secondaryMuscles + '</div>' +
+    '</div>';
+  }
+  html += '<div class="edb-detail-section">' +
+      '<div class="edb-detail-label">Equipment</div>' +
+      '<div class="edb-detail-tags">' + equips + '</div>' +
+    '</div>';
+  if (instructionsHtml) {
+    html += '<div class="edb-detail-section">' +
+      '<div class="edb-detail-label">Ausführung</div>' +
+      instructionsHtml +
+    '</div>';
+  }
+  html += '<div class="edb-detail-actions">' +
+      '<button class="btn-primary" onclick="addEdbToPlanBuilder(\'' + ex.exerciseId + '\')">+ Zum Plan</button>' +
+    '</div>';
+
+  content.innerHTML = html;
+}
+
+// ---- RENDER: Favorites ----
+function renderEdbFavorites() {
+  const content = document.getElementById('edbContent');
+  const favs = getEdbFavorites();
+  if (favs.length === 0) {
+    content.innerHTML = '<div class="edb-empty">Noch keine Favoriten gespeichert.<br>Tippe \u2606 bei einer Übung, um sie zu speichern.</div>';
+    return;
+  }
+
+  // Gather cached exercises
+  const favExercises = favs.map(id => edbCache['_ex_' + id]).filter(Boolean);
+  if (favExercises.length > 0) {
+    renderEdbExerciseList(favExercises);
+  } else {
+    content.innerHTML = '<div class="edb-loading">Lade Favoriten...</div>';
+    Promise.all(favs.map(id => edbFetch('/exercises/' + id).then(d => {
+      const ex = Array.isArray(d) ? d[0] : d;
+      if (ex) edbCache['_ex_' + ex.exerciseId] = ex;
+      return ex;
+    }))).then(results => {
+      const valid = results.filter(Boolean);
+      if (valid.length > 0) renderEdbExerciseList(valid);
+      else content.innerHTML = '<div class="edb-empty">Favoriten konnten nicht geladen werden.</div>';
+    });
+  }
+}
+
+// ---- SEARCH ----
+function onEdbSearchInput(val) {
+  clearTimeout(edbSearchTimer);
+  if (!val || val.length < 2) {
+    if (edbNavStack.length === 0) renderEdbCategories();
+    return;
+  }
+  edbSearchTimer = setTimeout(function() { edbSearch(val); }, 400);
+}
+
+async function edbSearch(query) {
+  const content = document.getElementById('edbContent');
+  content.innerHTML = '<div class="edb-loading">Suche...</div>';
+  edbNavStack = [{ type: 'search', label: '"' + query + '"' }];
+  updateEdbBreadcrumb();
+
+  const data = await edbFetch('/exercises/search?q=' + encodeURIComponent(query) + '&offset=0&limit=30');
+  if (!data || data.length === 0) {
+    content.innerHTML = '<div class="edb-empty">Keine Ergebnisse für "' + escapeHtml(query) + '"</div>';
+    return;
+  }
+  data.forEach(ex => { edbCache['_ex_' + ex.exerciseId] = ex; });
+  renderEdbExerciseList(data);
+}
+
+// ---- BREADCRUMB ----
+function updateEdbBreadcrumb() {
+  const el = document.getElementById('edbBreadcrumb');
+  if (edbNavStack.length === 0) { el.innerHTML = ''; return; }
+
+  let html = '<div class="edb-breadcrumb">';
+  html += '<button onclick="renderExerciseDB()">Start</button>';
+  edbNavStack.forEach((item, i) => {
+    html += '<span class="sep">\u203A</span>';
+    if (i < edbNavStack.length - 1) {
+      if (item.type === 'region') html += '<button onclick="renderEdbRegion(\'' + item.label + '\')">' + item.label + '</button>';
+      else if (item.type === 'bodypart') html += '<button onclick="renderEdbBodyPart(\'' + item.value + '\',\'' + (edbNavStack[0] ? edbNavStack[0].label : '') + '\')">' + item.label + '</button>';
+      else html += '<span>' + item.label + '</span>';
+    } else {
+      html += '<span style="color:var(--ink);font-weight:600;">' + item.label + '</span>';
+    }
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+// ==================== EXERCISE SWAP ====================
+let swapContext = null;
+
+function openSwapOverlay(workoutName, exerciseIndex) {
+  const p = plan();
+  const exercises = p.workouts[workoutName];
+  const ex = exercises[exerciseIndex];
+  swapContext = { workoutName: workoutName, exerciseIndex: exerciseIndex, originalExercise: ex };
+
+  document.getElementById('swapTitle').textContent = 'Ersatz für: ' + ex.name;
+  document.getElementById('swapOverlay').classList.add('open');
+
+  const body = document.getElementById('swapBody');
+  body.innerHTML = '<div class="edb-loading">Suche Alternativen...</div>';
+
+  fetchSwapAlternatives(ex.name);
+}
+
+async function fetchSwapAlternatives(exerciseName) {
+  const body = document.getElementById('swapBody');
+
+  const searchData = await edbFetch('/exercises/search?q=' + encodeURIComponent(exerciseName) + '&offset=0&limit=5');
+
+  let targetMuscle = null;
+  let equipment = null;
+  if (searchData && searchData.length > 0) {
+    const match = searchData[0];
+    targetMuscle = match.targetMuscles && match.targetMuscles[0];
+    equipment = match.equipments && match.equipments[0];
+  }
+
+  if (!targetMuscle) {
+    const keyword = exerciseName.split(/[\s(]/)[0];
+    const fallbackData = await edbFetch('/exercises/search?q=' + encodeURIComponent(keyword) + '&offset=0&limit=20');
+    if (fallbackData && fallbackData.length > 0) {
+      renderSwapResults(fallbackData);
+    } else {
+      body.innerHTML = '<div class="edb-empty">Keine Alternativen gefunden.</div>';
+    }
+    return;
+  }
+
+  const muscleData = await edbFetch('/muscles/' + encodeURIComponent(targetMuscle) + '/exercises?offset=0&limit=30');
+  if (muscleData && muscleData.length > 0) {
+    const sorted = muscleData.slice().sort(function(a, b) {
+      const aMatch = (a.equipments && a.equipments.includes(equipment)) ? 0 : 1;
+      const bMatch = (b.equipments && b.equipments.includes(equipment)) ? 0 : 1;
+      return aMatch - bMatch;
+    });
+    renderSwapResults(sorted);
+  } else {
+    body.innerHTML = '<div class="edb-empty">Keine Alternativen gefunden.</div>';
+  }
+}
+
+function renderSwapResults(exercises) {
+  const body = document.getElementById('swapBody');
+  let html = '<div style="font-size:12px;color:var(--ink-muted);margin-bottom:12px;">Tippe auf eine Übung, um sie einzutauschen:</div>';
+  html += '<div class="edb-exercise-list">';
+  exercises.forEach(function(ex) {
+    const muscles = (ex.targetMuscles || []).map(m => deMuscleName(m)).join(', ');
+    const equip = (ex.equipments || []).map(e => deEquip(e)).join(', ');
+    edbCache['_ex_' + ex.exerciseId] = ex;
+    html += '<div class="edb-ex-card" onclick="confirmSwapExercise(\'' + ex.exerciseId + '\')">' +
+      '<img class="edb-ex-gif" src="' + ex.gifUrl + '" loading="lazy" alt="' + escapeHtml(ex.name) + '" onerror="this.src=\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 72 72%22><rect fill=%22%23111128%22 width=%2272%22 height=%2272%22/><text x=%2236%22 y=%2240%22 text-anchor=%22middle%22 fill=%22%2364748b%22 font-size=%2220%22>\uD83C\uDFCB\uFE0F</text></svg>\'"/>' +
+      '<div class="edb-ex-info">' +
+        '<div class="edb-ex-name">' + escapeHtml(ex.name) + '</div>' +
+        '<div class="edb-ex-muscles">' + escapeHtml(muscles) + '</div>' +
+        '<div class="edb-ex-tags">' + (equip ? '<span class="edb-ex-tag">' + escapeHtml(equip) + '</span>' : '') + '</div>' +
+      '</div>' +
+    '</div>';
+  });
+  html += '</div>';
+  body.innerHTML = html;
+}
+
+function confirmSwapExercise(exerciseId) {
+  const ex = edbCache['_ex_' + exerciseId];
+  if (!ex || !swapContext) return;
+
+  const workoutName = swapContext.workoutName;
+  const exerciseIndex = swapContext.exerciseIndex;
+
+  // Store swap modifications in localStorage
+  let customMods = loadGlobal('customPlanMods_' + currentUser) || {};
+  if (!customMods[workoutName]) customMods[workoutName] = {};
+  customMods[workoutName][exerciseIndex] = {
+    name: ex.name,
+    originalName: swapContext.originalExercise.name,
+    swappedAt: new Date().toISOString()
+  };
+  saveGlobal('customPlanMods_' + currentUser, customMods);
+
+  // Update the in-memory plan
+  const p = plan();
+  const oldEx = p.workouts[workoutName][exerciseIndex];
+  p.workouts[workoutName][exerciseIndex] = {
+    name: ex.name,
+    target: oldEx.target,
+    sets: oldEx.sets,
+    anchor: oldEx.anchor,
+    _swapped: true,
+    _originalName: oldEx.name
+  };
+
+  closeSwapOverlay();
+  renderTraining();
+  toast(ex.name + ' eingetauscht!');
+}
+
+function closeSwapOverlay() {
+  document.getElementById('swapOverlay').classList.remove('open');
+  swapContext = null;
+}
+
+// ==================== PLAN BUILDER ====================
+let planBuilderExercises = [];
+let planBuilderName = '';
+let planBuilderAddMode = false;
+
+function openPlanBuilder() {
+  planBuilderExercises = [];
+  planBuilderName = '';
+  planBuilderAddMode = false;
+  document.getElementById('planBuilderOverlay').classList.add('open');
+  renderPlanBuilderContent();
+}
+
+function closePlanBuilder() {
+  document.getElementById('planBuilderOverlay').classList.remove('open');
+  planBuilderAddMode = false;
+}
+
+function renderPlanBuilderContent() {
+  const body = document.getElementById('planBuilderBody');
+
+  if (planBuilderAddMode) {
+    body.innerHTML = '<div class="edb-search-wrap">' +
+      '<div class="edb-search-icon">\uD83D\uDD0D</div>' +
+      '<input type="text" class="edb-search-input" id="pbSearchInput" placeholder="Übung suchen..." autocomplete="off" oninput="onPbSearchInput(this.value)"/>' +
+    '</div>' +
+    '<div id="pbSearchResults"></div>';
+    setTimeout(function() { var el = document.getElementById('pbSearchInput'); if (el) el.focus(); }, 300);
+    return;
+  }
+
+  let html = '<div style="margin-bottom:16px;">' +
+    '<label style="font-size:12px;font-weight:600;color:var(--ink-muted);display:block;margin-bottom:6px;">Planname</label>' +
+    '<input type="text" id="pbNameInput" placeholder="z.B. Tag C (Arme + Schultern)" value="' + escapeHtml(planBuilderName) + '" onchange="planBuilderName=this.value" style="width:100%;padding:10px 14px;background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius-sm);color:var(--ink);font-size:14px;"/>' +
+  '</div>' +
+  '<div class="section-label">Übungen (' + planBuilderExercises.length + ')</div>';
+
+  if (planBuilderExercises.length === 0) {
+    html += '<div class="edb-empty">Noch keine Übungen hinzugefügt.</div>';
+  } else {
+    planBuilderExercises.forEach(function(ex, i) {
+      html += '<div class="plan-builder-item">' +
+        '<div class="item-info">' +
+          '<div class="item-name">' + escapeHtml(ex.name) + '</div>' +
+          '<div class="item-meta">' + escapeHtml((ex.targetMuscles || []).map(m => deMuscleName(m)).join(', ')) + ' \u00B7 ' + escapeHtml((ex.equipments || []).map(e => deEquip(e)).join(', ')) + '</div>' +
+        '</div>' +
+        '<div class="item-config">' +
+          '<input type="number" inputmode="numeric" value="' + (ex._sets || 3) + '" min="1" max="10" onchange="planBuilderExercises[' + i + ']._sets=parseInt(this.value)||3" title="Sätze"/>' +
+          '<span style="font-size:11px;color:var(--ink-muted);">Sätze</span>' +
+        '</div>' +
+        '<div style="display:flex;flex-direction:column;gap:2px;">' +
+          (i > 0 ? '<button class="item-move" onclick="movePbExercise(' + i + ',-1)">\u25B2</button>' : '<div style="width:24px;height:16px;"></div>') +
+          (i < planBuilderExercises.length - 1 ? '<button class="item-move" onclick="movePbExercise(' + i + ',1)">\u25BC</button>' : '<div style="width:24px;height:16px;"></div>') +
+        '</div>' +
+        '<button class="item-remove" onclick="removePbExercise(' + i + ')">\u2715</button>' +
+      '</div>';
+    });
+  }
+
+  html += '<button class="btn-primary" style="margin-top:12px;width:100%;font-size:13px;" onclick="startPbAddMode()">+ Übung hinzufügen</button>';
+
+  // Show existing custom plans
+  const customPlans = loadGlobal('customPlans_' + currentUser) || [];
+  if (customPlans.length > 0) {
+    html += '<div class="custom-plans-section"><div class="section-label">Gespeicherte Pläne</div>';
+    customPlans.forEach(function(cp, i) {
+      html += '<div class="custom-plan-card">' +
+        '<div>' +
+          '<div class="plan-name">' + escapeHtml(cp.name) + '</div>' +
+          '<div class="plan-meta">' + cp.exercises.length + ' Übungen</div>' +
+        '</div>' +
+        '<div class="plan-actions">' +
+          '<button class="plan-action-btn" onclick="loadCustomPlanIntoBuilder(' + i + ')">Bearbeiten</button>' +
+          '<button class="plan-delete-btn" onclick="deleteCustomPlan(' + i + ')">Löschen</button>' +
+        '</div>' +
+      '</div>';
+    });
+    html += '</div>';
+  }
+
+  body.innerHTML = html;
+}
+
+function startPbAddMode() {
+  planBuilderAddMode = true;
+  var nameEl = document.getElementById('pbNameInput');
+  planBuilderName = nameEl ? nameEl.value : planBuilderName;
+  renderPlanBuilderContent();
+}
+
+let pbSearchTimer = null;
+function onPbSearchInput(val) {
+  clearTimeout(pbSearchTimer);
+  if (!val || val.length < 2) {
+    document.getElementById('pbSearchResults').innerHTML = '';
+    return;
+  }
+  pbSearchTimer = setTimeout(function() { pbSearch(val); }, 400);
+}
+
+async function pbSearch(query) {
+  const resultsEl = document.getElementById('pbSearchResults');
+  resultsEl.innerHTML = '<div class="edb-loading">Suche...</div>';
+
+  const data = await edbFetch('/exercises/search?q=' + encodeURIComponent(query) + '&offset=0&limit=20');
+  if (!data || data.length === 0) {
+    resultsEl.innerHTML = '<div class="edb-empty">Keine Ergebnisse für "' + escapeHtml(query) + '"</div>';
+    return;
+  }
+
+  let html = '<div class="edb-exercise-list">';
+  data.forEach(function(ex) {
+    edbCache['_ex_' + ex.exerciseId] = ex;
+    const muscles = (ex.targetMuscles || []).map(m => deMuscleName(m)).join(', ');
+    const equip = (ex.equipments || []).map(e => deEquip(e)).join(', ');
+    html += '<div class="edb-ex-card" onclick="addExerciseToPlanBuilder(\'' + ex.exerciseId + '\')">' +
+      '<img class="edb-ex-gif" src="' + ex.gifUrl + '" loading="lazy" alt="' + escapeHtml(ex.name) + '" onerror="this.src=\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 72 72%22><rect fill=%22%23111128%22 width=%2272%22 height=%2272%22/><text x=%2236%22 y=%2240%22 text-anchor=%22middle%22 fill=%22%2364748b%22 font-size=%2220%22>\uD83C\uDFCB\uFE0F</text></svg>\'"/>' +
+      '<div class="edb-ex-info">' +
+        '<div class="edb-ex-name">' + escapeHtml(ex.name) + '</div>' +
+        '<div class="edb-ex-muscles">' + escapeHtml(muscles) + '</div>' +
+        '<div class="edb-ex-tags">' + (equip ? '<span class="edb-ex-tag">' + escapeHtml(equip) + '</span>' : '') + '</div>' +
+      '</div>' +
+      '<div style="color:var(--green);font-size:20px;padding:4px;">+</div>' +
+    '</div>';
+  });
+  html += '</div>';
+  resultsEl.innerHTML = html;
+}
+
+function addExerciseToPlanBuilder(exerciseId) {
+  const ex = edbCache['_ex_' + exerciseId];
+  if (!ex) return;
+  planBuilderExercises.push(Object.assign({}, ex, { _sets: 3 }));
+  toast(ex.name + ' hinzugefügt!');
+  planBuilderAddMode = false;
+  renderPlanBuilderContent();
+}
+
+function addEdbToPlanBuilder(exerciseId) {
+  const ex = edbCache['_ex_' + exerciseId];
+  if (!ex) return;
+  planBuilderExercises.push(Object.assign({}, ex, { _sets: 3 }));
+  document.getElementById('planBuilderOverlay').classList.add('open');
+  planBuilderAddMode = false;
+  renderPlanBuilderContent();
+  toast(ex.name + ' zum Plan hinzugefügt!');
+}
+
+function removePbExercise(index) {
+  planBuilderExercises.splice(index, 1);
+  renderPlanBuilderContent();
+}
+
+function movePbExercise(index, dir) {
+  const newIndex = index + dir;
+  if (newIndex < 0 || newIndex >= planBuilderExercises.length) return;
+  const temp = planBuilderExercises[index];
+  planBuilderExercises[index] = planBuilderExercises[newIndex];
+  planBuilderExercises[newIndex] = temp;
+  renderPlanBuilderContent();
+}
+
+function savePlanFromBuilder() {
+  var nameEl = document.getElementById('pbNameInput');
+  planBuilderName = nameEl ? nameEl.value : planBuilderName;
+  if (!planBuilderName.trim()) { toast('Bitte Planname eingeben!'); return; }
+  if (planBuilderExercises.length === 0) { toast('Bitte mindestens eine Übung hinzufügen!'); return; }
+
+  const customPlans = loadGlobal('customPlans_' + currentUser) || [];
+
+  const newPlan = {
+    name: planBuilderName.trim(),
+    exercises: planBuilderExercises.map(function(ex) {
+      return {
+        name: ex.name,
+        target: (ex._sets || 3) + 'x8-12',
+        sets: ex._sets || 3,
+        targetMuscles: ex.targetMuscles,
+        equipments: ex.equipments,
+        exerciseId: ex.exerciseId
+      };
+    }),
+    createdAt: new Date().toISOString()
+  };
+
+  // Check if editing existing plan
+  const editIdx = customPlans.findIndex(function(cp) { return cp.name === newPlan.name; });
+  if (editIdx >= 0) {
+    customPlans[editIdx] = newPlan;
+  } else {
+    customPlans.push(newPlan);
+  }
+
+  saveGlobal('customPlans_' + currentUser, customPlans);
+
+  // Add to PLANS so it shows up in training
+  PLANS[currentUser].workouts[newPlan.name] = newPlan.exercises;
+
+  closePlanBuilder();
+  toast('Plan "' + newPlan.name + '" gespeichert!');
+  renderTraining();
+}
+
+function loadCustomPlanIntoBuilder(index) {
+  const customPlans = loadGlobal('customPlans_' + currentUser) || [];
+  const cp = customPlans[index];
+  if (!cp) return;
+  planBuilderName = cp.name;
+  planBuilderExercises = cp.exercises.map(function(ex) { return Object.assign({}, ex, { _sets: ex.sets || 3 }); });
+  planBuilderAddMode = false;
+  renderPlanBuilderContent();
+}
+
+function deleteCustomPlan(index) {
+  const customPlans = loadGlobal('customPlans_' + currentUser) || [];
+  const cp = customPlans[index];
+  if (!cp) return;
+  customPlans.splice(index, 1);
+  saveGlobal('customPlans_' + currentUser, customPlans);
+
+  // Remove from in-memory PLANS
+  delete PLANS[currentUser].workouts[cp.name];
+
+  renderPlanBuilderContent();
+  toast('Plan gelöscht');
+  renderTraining();
+}
+
+// Load custom plans on startup
+function loadCustomPlansIntoMemory() {
+  if (!currentUser) return;
+  const customPlans = loadGlobal('customPlans_' + currentUser) || [];
+  customPlans.forEach(function(cp) {
+    PLANS[currentUser].workouts[cp.name] = cp.exercises;
+  });
 }
 
 // ==================== SERVICE WORKER ====================
