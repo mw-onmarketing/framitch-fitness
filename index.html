@@ -3402,7 +3402,14 @@ function renderSharedNotes(firebaseNotes, localNote, exName) {
   var container = document.getElementById('sharedNotesList');
   if (!container) return;
 
-  var allNotes = Array.isArray(firebaseNotes) ? firebaseNotes : Object.values(firebaseNotes || {});
+  var allNotes = [];
+  if (Array.isArray(firebaseNotes)) {
+    allNotes = firebaseNotes;
+  } else if (firebaseNotes && typeof firebaseNotes === 'object') {
+    allNotes = Object.values(firebaseNotes);
+  }
+  // Filter out null/undefined entries (Firebase sparse arrays)
+  allNotes = allNotes.filter(function(n) { return n && typeof n === 'object' && n.text; });
 
   if (allNotes.length === 0 && !localNote) {
     container.innerHTML = '<div style="font-size:12px;color:var(--ink-muted);text-align:center;padding:8px;">Noch keine Notizen.</div>';
@@ -3412,10 +3419,10 @@ function renderSharedNotes(firebaseNotes, localNote, exName) {
   var html = '';
 
   allNotes.forEach(function(note) {
-    if (!note || !note.text) return;
-    var avatar = note.author === 'mitch' ? 'Mitch.png' : 'Fran.png';
-    var name = note.author === 'mitch' ? 'Mitch' : 'Fran';
-    var date = note.timestamp ? new Date(note.timestamp).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
+    var author = (note.author || '').toLowerCase();
+    var avatar = author === 'mitch' ? 'Mitch.png' : 'Fran.png';
+    var name = author === 'mitch' ? 'Mitch' : 'Fran';
+    var date = note.timestamp ? new Date(note.timestamp).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
     html += '<div style="display:flex;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);">' +
       '<img src="' + avatar + '" style="width:24px;height:24px;border-radius:50%;object-fit:cover;margin-top:2px;flex-shrink:0;"/>' +
       '<div style="flex:1;min-width:0;">' +
@@ -5575,6 +5582,36 @@ function translateExerciseName(name) {
   return name;
 }
 
+const EXERCISE_NAME_DE = {
+  'squat': 'Kniebeuge', 'bench press': 'Bankdrücken', 'deadlift': 'Kreuzheben',
+  'row': 'Rudern', 'lat pulldown': 'Latziehen', 'overhead press': 'Schulterdrücken',
+  'lateral raise': 'Seitheben', 'bicep curl': 'Bizeps-Curl', 'tricep': 'Trizeps',
+  'leg press': 'Beinpresse', 'leg curl': 'Beinbeuger', 'leg extension': 'Beinstrecker',
+  'calf raise': 'Wadenheben', 'chest press': 'Brustpresse', 'chest fly': 'Butterfly',
+  'pull up': 'Klimmzug', 'dip': 'Dip', 'lunge': 'Ausfallschritt',
+  'hip thrust': 'Hip Thrust', 'romanian deadlift': 'Rumänisches Kreuzheben',
+  'hack squat': 'Hack Squat', 'front raise': 'Frontheben', 'face pull': 'Face Pull',
+  'shrug': 'Schulterheben', 'plank': 'Plank', 'crunch': 'Crunch',
+  'push up': 'Liegestütz', 'pull-up': 'Klimmzug', 'push-up': 'Liegestütz',
+  'incline bench': 'Schrägbank', 'flat bench': 'Flachbank',
+  'cable fly': 'Kabelzug Fly', 'reverse fly': 'Reverse Fly',
+  'hammer curl': 'Hammercurl', 'preacher curl': 'Scott-Curl',
+  'skull crusher': 'Stirndrücken', 'tricep pushdown': 'Trizepsdrücken',
+  'cable crossover': 'Kabelzug Crossover', 'seated row': 'Rudern sitzend',
+  'barbell curl': 'Langhantel-Curl', 'dumbbell curl': 'Kurzhantel-Curl',
+  'goblet squat': 'Goblet Squat', 'bulgarian split squat': 'Bulgarische Kniebeuge',
+  'sumo deadlift': 'Sumo Kreuzheben', 'good morning': 'Good Morning',
+  'glute bridge': 'Glute Bridge', 'step up': 'Step-Up'
+};
+
+function getDeExerciseName(englishName) {
+  var lower = englishName.toLowerCase();
+  for (var en in EXERCISE_NAME_DE) {
+    if (lower.includes(en)) return EXERCISE_NAME_DE[en];
+  }
+  return '';
+}
+
 const BODY_REGION_MAP = {
   'Oberkörper': ['chest', 'back', 'shoulders', 'upper arms', 'lower arms', 'neck'],
   'Unterkörper': ['upper legs', 'lower legs'],
@@ -5689,7 +5726,7 @@ function renderEdbExerciseList(exercises) {
     html += '<div class="edb-ex-card" onclick="renderEdbDetail(\'' + ex.exerciseId + '\')">' +
       '<img class="edb-ex-gif" src="' + ex.gifUrl + '" loading="lazy" alt="' + escapeHtml(ex.name) + '" onerror="this.src=\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 72 72%22><rect fill=%22%23111128%22 width=%2272%22 height=%2272%22/><text x=%2236%22 y=%2240%22 text-anchor=%22middle%22 fill=%22%2364748b%22 font-size=%2220%22>\uD83C\uDFCB\uFE0F</text></svg>\'"/>' +
       '<div class="edb-ex-info">' +
-        '<div class="edb-ex-name">' + escapeHtml(ex.name) + '</div>' +
+        '<div class="edb-ex-name">' + escapeHtml(ex.name) + (getDeExerciseName(ex.name) ? ' <span style="color:var(--ink-muted);font-weight:500;font-size:11px;">(' + getDeExerciseName(ex.name) + ')</span>' : '') + '</div>' +
         '<div class="edb-ex-muscles">' + escapeHtml(muscles) + '</div>' +
         '<div class="edb-ex-tags">' + (equip ? '<span class="edb-ex-tag">' + escapeHtml(equip) + '</span>' : '') + '</div>' +
       '</div>' +
@@ -5859,6 +5896,7 @@ function openSwapOverlay(workoutName, exerciseIndex) {
 
   document.getElementById('swapTitle').textContent = 'Ersatz für: ' + ex.name;
   document.getElementById('swapOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
 
   var body = document.getElementById('swapBody');
   var html = '<div class="edb-search-wrap">' +
@@ -5866,6 +5904,7 @@ function openSwapOverlay(workoutName, exerciseIndex) {
     '<input type="text" class="edb-search-input" id="swapSearchInput" placeholder="Übung suchen..." autocomplete="off" oninput="onSwapSearchInput(this.value)"/>' +
   '</div>';
   html += '<div id="swapSearchResults"></div>';
+  html += '<div style="margin:8px 0;"><button class="ex-footer-btn" onclick="document.getElementById(\'swapCategoryBrowser\').scrollIntoView({behavior:\'smooth\'})">📂 Alle Kategorien anzeigen</button></div>';
   html += '<div id="swapSuggestions"><div class="edb-loading">Suche Alternativen...</div></div>';
   html += '<div id="swapCategoryBrowser"></div>';
   body.innerHTML = html;
@@ -5909,9 +5948,9 @@ function renderSwapResultsInto(container, exercises) {
     var equip = (ex.equipments || []).map(function(e) { return deEquip(e); }).join(', ');
     edbCache['_ex_' + ex.exerciseId] = ex;
     html += '<div class="edb-ex-card" onclick="confirmSwapExercise(\'' + ex.exerciseId + '\')">' +
-      '<img class="edb-ex-gif" src="' + ex.gifUrl + '" loading="lazy" alt="' + escapeHtml(ex.name) + '" onerror="this.src=\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 72 72%22><rect fill=%22%23111128%22 width=%2272%22 height=%2272%22/><text x=%2236%22 y=%2240%22 text-anchor=%22middle%22 fill=%22%2364748b%22 font-size=%2220%22>\uD83C\uDFCB\uFE0F</text></svg>\'"/>' +
+      '<img class="edb-ex-gif" src="' + ex.gifUrl + '" loading="lazy" alt="' + escapeHtml(ex.name) + '" onclick="event.stopPropagation(); showSwapExerciseDetail(\'' + ex.exerciseId + '\')" style="cursor:zoom-in;" onerror="this.src=\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 72 72%22><rect fill=%22%23111128%22 width=%2272%22 height=%2272%22/><text x=%2236%22 y=%2240%22 text-anchor=%22middle%22 fill=%22%2364748b%22 font-size=%2220%22>\uD83C\uDFCB\uFE0F</text></svg>\'"/>' +
       '<div class="edb-ex-info">' +
-        '<div class="edb-ex-name">' + escapeHtml(ex.name) + '</div>' +
+        '<div class="edb-ex-name">' + escapeHtml(ex.name) + (getDeExerciseName(ex.name) ? ' <span style="color:var(--ink-muted);font-weight:500;font-size:11px;">(' + getDeExerciseName(ex.name) + ')</span>' : '') + '</div>' +
         '<div class="edb-ex-muscles">' + escapeHtml(muscles) + '</div>' +
         '<div class="edb-ex-tags">' + (equip ? '<span class="edb-ex-tag">' + escapeHtml(equip) + '</span>' : '') + '</div>' +
       '</div>' +
@@ -6014,9 +6053,9 @@ async function renderSwapBodyPart(part, region) {
     var muscles = (ex.targetMuscles || []).map(function(m) { return deMuscleName(m); }).join(', ');
     var equip = (ex.equipments || []).map(function(e) { return deEquip(e); }).join(', ');
     html += '<div class="edb-ex-card" onclick="confirmSwapExercise(\'' + ex.exerciseId + '\')">' +
-      '<img class="edb-ex-gif" src="' + ex.gifUrl + '" loading="lazy" alt="' + escapeHtml(ex.name) + '" onerror="this.src=\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 72 72%22><rect fill=%22%23111128%22 width=%2272%22 height=%2272%22/><text x=%2236%22 y=%2240%22 text-anchor=%22middle%22 fill=%22%2364748b%22 font-size=%2220%22>\uD83C\uDFCB\uFE0F</text></svg>\'"/>' +
+      '<img class="edb-ex-gif" src="' + ex.gifUrl + '" loading="lazy" alt="' + escapeHtml(ex.name) + '" onclick="event.stopPropagation(); showSwapExerciseDetail(\'' + ex.exerciseId + '\')" style="cursor:zoom-in;" onerror="this.src=\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 72 72%22><rect fill=%22%23111128%22 width=%2272%22 height=%2272%22/><text x=%2236%22 y=%2240%22 text-anchor=%22middle%22 fill=%22%2364748b%22 font-size=%2220%22>\uD83C\uDFCB\uFE0F</text></svg>\'"/>' +
       '<div class="edb-ex-info">' +
-        '<div class="edb-ex-name">' + escapeHtml(ex.name) + '</div>' +
+        '<div class="edb-ex-name">' + escapeHtml(ex.name) + (getDeExerciseName(ex.name) ? ' <span style="color:var(--ink-muted);font-weight:500;font-size:11px;">(' + getDeExerciseName(ex.name) + ')</span>' : '') + '</div>' +
         '<div class="edb-ex-muscles">' + escapeHtml(muscles) + '</div>' +
         '<div class="edb-ex-tags">' + (equip ? '<span class="edb-ex-tag">' + escapeHtml(equip) + '</span>' : '') + '</div>' +
       '</div>' +
@@ -6026,15 +6065,21 @@ async function renderSwapBodyPart(part, region) {
   container.innerHTML = html;
 }
 
+let lastSwapUndo = null;
+
 function confirmSwapExercise(exerciseId) {
-  const ex = edbCache['_ex_' + exerciseId];
+  var ex = edbCache['_ex_' + exerciseId];
   if (!ex || !swapContext) return;
 
-  const workoutName = swapContext.workoutName;
-  const exerciseIndex = swapContext.exerciseIndex;
+  var workoutName = swapContext.workoutName;
+  var exerciseIndex = swapContext.exerciseIndex;
+
+  // Save previous state for undo
+  var p = plan();
+  var oldEx = JSON.parse(JSON.stringify(p.workouts[workoutName][exerciseIndex]));
 
   // Store swap modifications in localStorage
-  let customMods = loadGlobal('customPlanMods_' + currentUser) || {};
+  var customMods = loadGlobal('customPlanMods_' + currentUser) || {};
   if (!customMods[workoutName]) customMods[workoutName] = {};
   customMods[workoutName][exerciseIndex] = {
     name: ex.name,
@@ -6044,24 +6089,100 @@ function confirmSwapExercise(exerciseId) {
   saveGlobal('customPlanMods_' + currentUser, customMods);
 
   // Update the in-memory plan
-  const p = plan();
-  const oldEx = p.workouts[workoutName][exerciseIndex];
   p.workouts[workoutName][exerciseIndex] = {
     name: ex.name,
     target: oldEx.target,
     sets: oldEx.sets,
     anchor: oldEx.anchor,
     _swapped: true,
-    _originalName: oldEx.name
+    _originalName: oldEx._originalName || oldEx.name
+  };
+
+  // Save undo state
+  lastSwapUndo = {
+    workoutName: workoutName,
+    exerciseIndex: exerciseIndex,
+    previousExercise: oldEx,
+    timeout: null
   };
 
   closeSwapOverlay();
   renderTraining();
-  toast(ex.name + ' eingetauscht!');
+
+  // Show toast with undo button
+  showSwapUndoToast(ex.name);
+}
+
+function showSwapUndoToast(newName) {
+  var container = document.getElementById('toastContainer');
+  var el = document.createElement('div');
+  el.className = 'toast show';
+  el.innerHTML = escapeHtml(newName) + ' eingetauscht! <button onclick="undoLastSwap()" style="color:var(--accent);font-weight:700;margin-left:8px;text-decoration:underline;">Rückgängig</button>';
+  el.style.cssText = 'display:flex;align-items:center;justify-content:center;';
+  container.appendChild(el);
+
+  // Auto-remove after 6 seconds
+  lastSwapUndo.timeout = setTimeout(function() {
+    el.classList.remove('show');
+    setTimeout(function() { el.remove(); }, 300);
+    lastSwapUndo = null;
+  }, 6000);
+}
+
+function undoLastSwap() {
+  if (!lastSwapUndo) return;
+  var info = lastSwapUndo;
+  clearTimeout(info.timeout);
+
+  // Restore in-memory plan
+  var p = plan();
+  p.workouts[info.workoutName][info.exerciseIndex] = info.previousExercise;
+
+  // Remove from customMods
+  var customMods = loadGlobal('customPlanMods_' + currentUser) || {};
+  if (customMods[info.workoutName]) {
+    delete customMods[info.workoutName][info.exerciseIndex];
+    if (Object.keys(customMods[info.workoutName]).length === 0) delete customMods[info.workoutName];
+    saveGlobal('customPlanMods_' + currentUser, customMods);
+  }
+
+  lastSwapUndo = null;
+  renderTraining();
+  toast('Tausch rückgängig gemacht!');
+}
+
+function showSwapExerciseDetail(exerciseId) {
+  var ex = edbCache['_ex_' + exerciseId];
+  if (!ex) return;
+
+  var targetMuscles = (ex.targetMuscles || []).map(function(m) { return '<span class="edb-detail-tag">' + deMuscleName(m) + '</span>'; }).join('');
+  var secondaryMuscles = (ex.secondaryMuscles || []).map(function(m) { return '<span class="edb-detail-tag secondary">' + deMuscleName(m) + '</span>'; }).join('');
+  var equips = (ex.equipments || []).map(function(e) { return '<span class="edb-detail-tag equip">' + deEquip(e) + '</span>'; }).join('');
+
+  var instructionsHtml = '';
+  (ex.instructions || []).forEach(function(inst, i) {
+    var text = inst.replace(/^Step:\d+\s*/i, '');
+    instructionsHtml += '<div class="edb-instruction">' +
+      '<div class="edb-instruction-num">' + (i + 1) + '</div>' +
+      '<div>' + escapeHtml(text) + '</div>' +
+    '</div>';
+  });
+
+  var html = '<div class="modal-handle"></div>' +
+    '<img class="edb-detail-gif" src="' + ex.gifUrl + '" alt="' + escapeHtml(ex.name) + '" style="margin-bottom:12px;"/>' +
+    '<h3 style="font-size:17px;font-weight:800;text-transform:capitalize;margin-bottom:12px;">' + escapeHtml(ex.name) + '</h3>' +
+    '<div class="edb-detail-section"><div class="edb-detail-label">Zielmuskeln</div><div class="edb-detail-tags">' + targetMuscles + '</div></div>' +
+    (secondaryMuscles ? '<div class="edb-detail-section"><div class="edb-detail-label">Sekundäre Muskeln</div><div class="edb-detail-tags">' + secondaryMuscles + '</div></div>' : '') +
+    '<div class="edb-detail-section"><div class="edb-detail-label">Equipment</div><div class="edb-detail-tags">' + equips + '</div></div>' +
+    (instructionsHtml ? '<div class="edb-detail-section"><div class="edb-detail-label">Ausführung</div>' + instructionsHtml + '</div>' : '') +
+    '<button class="btn-primary" style="margin-top:12px;width:100%;" onclick="closeModal(); confirmSwapExercise(\'' + exerciseId + '\')">Übung eintauschen</button>';
+
+  showModal(html);
 }
 
 function closeSwapOverlay() {
   document.getElementById('swapOverlay').classList.remove('open');
+  document.body.style.overflow = '';
   swapContext = null;
 }
 
@@ -6075,11 +6196,13 @@ function openPlanBuilder() {
   planBuilderName = '';
   planBuilderAddMode = false;
   document.getElementById('planBuilderOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
   renderPlanBuilderContent();
 }
 
 function closePlanBuilder() {
   document.getElementById('planBuilderOverlay').classList.remove('open');
+  document.body.style.overflow = '';
   planBuilderAddMode = false;
 }
 
@@ -6210,7 +6333,7 @@ async function renderPbBodyPart(part, region) {
     html += '<div class="edb-ex-card" onclick="addExerciseToPlanBuilder(\'' + ex.exerciseId + '\')">' +
       '<img class="edb-ex-gif" src="' + ex.gifUrl + '" loading="lazy" alt="' + escapeHtml(ex.name) + '" onerror="this.src=\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 72 72%22><rect fill=%22%23111128%22 width=%2272%22 height=%2272%22/><text x=%2236%22 y=%2240%22 text-anchor=%22middle%22 fill=%22%2364748b%22 font-size=%2220%22>\uD83C\uDFCB\uFE0F</text></svg>\'"/>' +
       '<div class="edb-ex-info">' +
-        '<div class="edb-ex-name">' + escapeHtml(ex.name) + '</div>' +
+        '<div class="edb-ex-name">' + escapeHtml(ex.name) + (getDeExerciseName(ex.name) ? ' <span style="color:var(--ink-muted);font-weight:500;font-size:11px;">(' + getDeExerciseName(ex.name) + ')</span>' : '') + '</div>' +
         '<div class="edb-ex-muscles">' + escapeHtml(muscles) + '</div>' +
         '<div class="edb-ex-tags">' + (equip ? '<span class="edb-ex-tag">' + escapeHtml(equip) + '</span>' : '') + '</div>' +
       '</div>' +
@@ -6252,7 +6375,7 @@ async function pbSearch(query) {
     html += '<div class="edb-ex-card" onclick="addExerciseToPlanBuilder(\'' + ex.exerciseId + '\')">' +
       '<img class="edb-ex-gif" src="' + ex.gifUrl + '" loading="lazy" alt="' + escapeHtml(ex.name) + '" onerror="this.src=\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 72 72%22><rect fill=%22%23111128%22 width=%2272%22 height=%2272%22/><text x=%2236%22 y=%2240%22 text-anchor=%22middle%22 fill=%22%2364748b%22 font-size=%2220%22>\uD83C\uDFCB\uFE0F</text></svg>\'"/>' +
       '<div class="edb-ex-info">' +
-        '<div class="edb-ex-name">' + escapeHtml(ex.name) + '</div>' +
+        '<div class="edb-ex-name">' + escapeHtml(ex.name) + (getDeExerciseName(ex.name) ? ' <span style="color:var(--ink-muted);font-weight:500;font-size:11px;">(' + getDeExerciseName(ex.name) + ')</span>' : '') + '</div>' +
         '<div class="edb-ex-muscles">' + escapeHtml(muscles) + '</div>' +
         '<div class="edb-ex-tags">' + (equip ? '<span class="edb-ex-tag">' + escapeHtml(equip) + '</span>' : '') + '</div>' +
       '</div>' +
