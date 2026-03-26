@@ -343,7 +343,7 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
   position: relative;
 }
 .nav-btn:active { transform: scale(0.9); }
-.nav-btn svg { width: 18px; height: 18px; fill: currentColor; transition: fill 0.2s; }
+.nav-btn svg { width: 22px; height: 22px; fill: currentColor; transition: fill 0.2s; }
 .nav-btn.active { color: var(--accent); font-weight: 700; }
 .nav-btn.active::after {
   content: '';
@@ -2325,6 +2325,71 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
   border-radius: 6px; background: rgba(var(--red-rgb),0.08); color: var(--red);
 }
 
+/* ==================== MORE MENU ==================== */
+.more-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 150; display: none; align-items: flex-end; justify-content: center;
+}
+.more-overlay.open { display: flex; }
+.more-menu {
+  background: var(--bg-elevated); border-radius: 20px 20px 0 0;
+  padding: 20px 20px calc(var(--nav-height) + var(--safe-bottom) + 12px);
+  width: 100%; max-width: 500px;
+  border-top: 1px solid var(--card-border);
+}
+.more-menu-handle {
+  width: 36px; height: 4px; border-radius: 2px;
+  background: var(--ink-muted); opacity: 0.3;
+  margin: 0 auto 16px;
+}
+.more-menu-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+}
+.more-menu-item {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 6px; padding: 16px 8px; border-radius: var(--radius);
+  background: var(--card); border: 1px solid var(--card-border);
+  transition: border-color 0.2s, background 0.2s;
+}
+.more-menu-item:active { background: var(--card-hover); border-color: var(--accent); }
+.more-menu-item svg { width: 24px; height: 24px; fill: var(--ink); }
+.more-menu-item span { font-size: 11px; font-weight: 600; color: var(--ink-secondary); }
+.more-menu-item.has-badge { position: relative; }
+.more-menu-item .menu-badge {
+  position: absolute; top: 8px; right: 8px;
+  background: var(--red); color: #fff; font-size: 9px; font-weight: 700;
+  min-width: 16px; height: 16px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center; padding: 0 4px;
+}
+
+/* ==================== NOTIFICATIONS ==================== */
+.notif-badge {
+  position: absolute; top: 2px; right: 50%; transform: translateX(calc(50% + 10px));
+  background: var(--red); color: #fff; font-size: 9px; font-weight: 700;
+  min-width: 16px; height: 16px; border-radius: 8px;
+  display: none; align-items: center; justify-content: center; padding: 0 4px;
+}
+.notif-badge.show { display: flex; }
+
+.notif-list { display: flex; flex-direction: column; gap: 2px; }
+.notif-item {
+  display: flex; gap: 12px; padding: 14px 0;
+  border-bottom: 1px solid var(--line); align-items: flex-start;
+}
+.notif-item:last-child { border-bottom: none; }
+.notif-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  object-fit: cover; flex-shrink: 0;
+}
+.notif-content { flex: 1; min-width: 0; }
+.notif-text { font-size: 13px; line-height: 1.4; }
+.notif-text strong { font-weight: 700; }
+.notif-time { font-size: 11px; color: var(--ink-muted); margin-top: 2px; }
+.notif-unread { background: rgba(var(--accent-rgb),0.05); margin: 0 -20px; padding: 14px 20px; border-radius: 0; }
+.notif-empty { text-align: center; padding: 40px 20px; color: var(--ink-muted); font-size: 13px; }
+
 /* ==================== RESPONSIVE ==================== */
 @media (min-width: 500px) {
   .page { padding: 0 24px 24px; max-width: 500px; margin: 0 auto; }
@@ -2435,6 +2500,13 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
     <div class="section-label">Letzte Einheiten</div>
     <div class="glass-card">
       <div id="workoutHistory"></div>
+    </div>
+  </div>
+
+  <!-- NOTIFICATIONS -->
+  <div id="pageNotifications" class="page">
+    <div id="notifContent">
+      <div class="notif-empty">Keine Benachrichtigungen</div>
     </div>
   </div>
 
@@ -2626,32 +2698,49 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
       <svg viewBox="0 0 24 24"><path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 2.71 2.71 4.14l1.43 1.43L2 7.71l1.43 1.43L2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22l1.43-1.43 1.43 1.43 2.14-2.14 1.43 1.43 1.43-1.43-1.43-1.43L22 16.29z"/></svg>
       <span>Training</span>
     </button>
-    <button class="nav-btn" onclick="showPage('ExerciseDB')" data-page="ExerciseDB">
-      <svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z"/></svg>
-      <span>Übungen</span>
+    <button class="nav-btn" onclick="showPage('Notifications')" data-page="Notifications" style="position:relative;">
+      <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+      <span>Glocke</span>
+      <div class="notif-badge" id="notifBadge">0</div>
     </button>
-    <button class="nav-btn" onclick="showPage('Weight')" data-page="Weight">
-      <svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9zm0 16c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7zm1-11h-2v3H8v2h3v3h2v-3h3v-2h-3V8z"/></svg>
-      <span>Gewicht</span>
-    </button>
-    <button class="nav-btn" onclick="showPage('Nutrition')" data-page="Nutrition">
-      <svg viewBox="0 0 24 24"><path d="M18.06 22.99h1.66c.84 0 1.53-.64 1.63-1.46L23 5.05h-5V1h-1.97v4.05h-4.97l.3 2.34c1.71.47 3.31 1.32 4.27 2.26 1.44 1.42 2.43 2.89 2.43 5.29v8.05zM1 21.99V21h15.03v.99c0 .55-.45 1-1.01 1H2.01c-.56 0-1.01-.45-1.01-1zm15.03-7c0-4.47-4.26-5.98-8.02-5.98S0 10.52 0 14.99h16.03zm-15 2h13.97v1H1.03v-1z"/></svg>
-      <span>Food</span>
-    </button>
-    <button class="nav-btn" onclick="showPage('Supps')" data-page="Supps">
-      <svg viewBox="0 0 24 24"><path d="M4.22 11.29l-1.23-1.23a4.003 4.003 0 010-5.66 4.003 4.003 0 015.66 0l1.22 1.22-5.65 5.67zm17.07-.73a3.983 3.983 0 00-.23-5.4l-.02-.02a3.99 3.99 0 00-5.39-.25L4.93 15.62a3.983 3.983 0 00.23 5.4l.02.02c1.49 1.49 3.88 1.56 5.39.25L21.29 10.56zM13.54 8.13l2.33 2.33-6.79 6.79-2.33-2.33 6.79-6.79z"/></svg>
-      <span>Supps</span>
-    </button>
-    <button class="nav-btn" onclick="showPage('Chat')" data-page="Chat" style="position:relative;">
-      <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
-      <span>Chat</span>
-      <div class="chat-unread-badge" id="chatUnreadBadge"></div>
-    </button>
-    <button class="nav-btn" onclick="showPage('Settings')" data-page="Settings">
-      <svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+    <button class="nav-btn" onclick="toggleMoreMenu()" data-page="More">
+      <svg viewBox="0 0 24 24"><path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/></svg>
       <span>Mehr</span>
     </button>
   </nav>
+</div>
+
+<!-- MORE MENU OVERLAY -->
+<div class="more-overlay" id="moreOverlay" onclick="if(event.target===this)closeMoreMenu()">
+  <div class="more-menu">
+    <div class="more-menu-handle"></div>
+    <div class="more-menu-grid">
+      <button class="more-menu-item" onclick="closeMoreMenu();showPage('ExerciseDB')">
+        <svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z"/></svg>
+        <span>Übungen</span>
+      </button>
+      <button class="more-menu-item" onclick="closeMoreMenu();showPage('Weight')">
+        <svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9zm0 16c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7zm1-11h-2v3H8v2h3v3h2v-3h3v-2h-3V8z"/></svg>
+        <span>Gewicht</span>
+      </button>
+      <button class="more-menu-item" onclick="closeMoreMenu();showPage('Nutrition')">
+        <svg viewBox="0 0 24 24"><path d="M18.06 22.99h1.66c.84 0 1.53-.64 1.63-1.46L23 5.05h-5V1h-1.97v4.05h-4.97l.3 2.34c1.71.47 3.31 1.32 4.27 2.26 1.44 1.42 2.43 2.89 2.43 5.29v8.05zM1 21.99V21h15.03v.99c0 .55-.45 1-1.01 1H2.01c-.56 0-1.01-.45-1.01-1zm15.03-7c0-4.47-4.26-5.98-8.02-5.98S0 10.52 0 14.99h16.03zm-15 2h13.97v1H1.03v-1z"/></svg>
+        <span>Food</span>
+      </button>
+      <button class="more-menu-item" onclick="closeMoreMenu();showPage('Supps')">
+        <svg viewBox="0 0 24 24"><path d="M4.22 11.29l-1.23-1.23a4.003 4.003 0 010-5.66 4.003 4.003 0 015.66 0l1.22 1.22-5.65 5.67zm17.07-.73a3.983 3.983 0 00-.23-5.4l-.02-.02a3.99 3.99 0 00-5.39-.25L4.93 15.62a3.983 3.983 0 00.23 5.4l.02.02c1.49 1.49 3.88 1.56 5.39.25L21.29 10.56zM13.54 8.13l2.33 2.33-6.79 6.79-2.33-2.33 6.79-6.79z"/></svg>
+        <span>Supps</span>
+      </button>
+      <button class="more-menu-item has-badge" onclick="closeMoreMenu();showPage('Chat')" id="moreChatBtn">
+        <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
+        <span>Chat</span>
+      </button>
+      <button class="more-menu-item" onclick="closeMoreMenu();showPage('Settings')">
+        <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.488.488 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+        <span>Einstellungen</span>
+      </button>
+    </div>
+  </div>
 </div>
 
 <!-- SWAP EXERCISE OVERLAY -->
@@ -2991,6 +3080,7 @@ function init() {
         }
       });
     }
+    initNotifListener();
   }, 500);
 }
 
@@ -3003,17 +3093,25 @@ function updateHeaderDate() {
 
 // ==================== PAGES ====================
 function showPage(name) {
+  closeMoreMenu();
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const page = document.getElementById('page' + name);
   if (page) page.classList.add('active');
 
+  var morePages = ['ExerciseDB', 'Weight', 'Nutrition', 'Supps', 'Chat', 'Settings'];
+  var isMorePage = morePages.includes(name);
   document.querySelectorAll('.nav-btn').forEach(b => {
-    b.classList.toggle('active', b.dataset.page === name);
+    if (b.dataset.page === 'More') {
+      b.classList.toggle('active', isMorePage);
+    } else {
+      b.classList.toggle('active', b.dataset.page === name);
+    }
   });
 
   const titles = {
     Dashboard: 'Dashboard', Training: 'Training', ExerciseDB: 'Übungen', Weight: 'Gewicht',
-    Nutrition: 'Ernährung', Supps: 'Supplements', Chat: 'Chat', Settings: 'Mehr'
+    Nutrition: 'Ernährung', Supps: 'Supplements', Chat: 'Chat', Settings: 'Mehr',
+    Notifications: 'Benachrichtigungen'
   };
   document.getElementById('pageTitle').textContent = titles[name] || name;
 
@@ -3043,6 +3141,7 @@ function showPage(name) {
   if (name === 'Chat') renderChat();
   if (name === 'Settings') renderSettings();
   if (name === 'ExerciseDB') renderExerciseDB();
+  if (name === 'Notifications') renderNotifications();
 }
 
 // ==================== DASHBOARD ====================
@@ -3468,6 +3567,7 @@ function saveExNotes(exName) {
       notes.push(newNote);
       firebaseDB.ref(fbPath).set(notes).then(function() {
         closeModal();
+        pushNotification('note', { exerciseName: exName });
         toast('Notiz gespeichert!');
         renderExercises();
       });
@@ -3510,6 +3610,7 @@ function finishWorkout() {
     const workouts = load('workouts', []);
     workouts.push({ date: today(), workout: selectedWorkout, exercises: sets });
     save('workouts', workouts);
+    pushNotification('workout_done', { workoutName: selectedWorkout });
 
     sets.forEach(ex => {
       const hist = load('exhist_' + ex.name, []);
@@ -4520,6 +4621,7 @@ function sendChat() {
   };
 
   firebaseDB.ref('chats/messages').push(msg);
+  pushNotification('chat', { preview: text.substring(0, 50) });
   input.value = '';
   input.style.height = '40px';
 
@@ -6184,6 +6286,178 @@ function closeSwapOverlay() {
   document.getElementById('swapOverlay').classList.remove('open');
   document.body.style.overflow = '';
   swapContext = null;
+}
+
+// ==================== MORE MENU ====================
+function toggleMoreMenu() {
+  var overlay = document.getElementById('moreOverlay');
+  if (overlay.classList.contains('open')) {
+    closeMoreMenu();
+  } else {
+    overlay.classList.add('open');
+    updateMoreChatBadge();
+  }
+}
+
+function closeMoreMenu() {
+  var overlay = document.getElementById('moreOverlay');
+  if (overlay) overlay.classList.remove('open');
+}
+
+function updateMoreChatBadge() {
+  var btn = document.getElementById('moreChatBtn');
+  if (!btn) return;
+  var existing = btn.querySelector('.menu-badge');
+  if (existing) existing.remove();
+
+  var savedSeen = parseInt(localStorage.getItem('ft_chat_last_seen') || '0');
+  var unreadCount = 0;
+  chatMessages.forEach(function(msg) {
+    if (msg.timestamp > savedSeen && msg.sender !== currentUser) unreadCount++;
+  });
+  if (unreadCount > 0) {
+    var badge = document.createElement('div');
+    badge.className = 'menu-badge';
+    badge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+    btn.appendChild(badge);
+  }
+}
+
+// ==================== NOTIFICATIONS ====================
+var notifListener = null;
+
+function pushNotification(type, data) {
+  initFirebase();
+  if (!firebaseDB || !currentUser) return;
+
+  var otherUser = currentUser === 'mitch' ? 'fran' : 'mitch';
+  var notif = {
+    type: type,
+    sender: currentUser,
+    senderName: currentUser === 'mitch' ? 'Mitch' : 'Fran',
+    timestamp: Date.now(),
+    read: false
+  };
+
+  if (type === 'workout_done') {
+    notif.message = data.workoutName;
+    notif.icon = '\uD83C\uDFCB\uFE0F';
+  } else if (type === 'chat') {
+    notif.message = data.preview || 'Neue Nachricht';
+    notif.icon = '\uD83D\uDCAC';
+  } else if (type === 'note') {
+    notif.message = data.exerciseName;
+    notif.icon = '\uD83D\uDCDD';
+  }
+
+  firebaseDB.ref('notifications/' + otherUser).push(notif);
+}
+
+function initNotifListener() {
+  if (notifListener || !firebaseDB || !currentUser) return;
+
+  var ref = firebaseDB.ref('notifications/' + currentUser).orderByChild('timestamp').limitToLast(50);
+  notifListener = ref.on('value', function(snapshot) {
+    updateNotifBadge(snapshot);
+  });
+}
+
+function updateNotifBadge(snapshot) {
+  var badge = document.getElementById('notifBadge');
+  if (!badge) return;
+
+  var unreadCount = 0;
+  if (snapshot) {
+    snapshot.forEach(function(child) {
+      var n = child.val();
+      if (n && !n.read) unreadCount++;
+    });
+  }
+
+  if (unreadCount > 0) {
+    badge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+    badge.classList.add('show');
+  } else {
+    badge.classList.remove('show');
+  }
+}
+
+function renderNotifications() {
+  initFirebase();
+  var content = document.getElementById('notifContent');
+  if (!firebaseDB || !currentUser) {
+    content.innerHTML = '<div class="notif-empty">Benachrichtigungen nicht verf\u00FCgbar</div>';
+    return;
+  }
+
+  content.innerHTML = '<div class="edb-loading">Lade...</div>';
+
+  var ref = firebaseDB.ref('notifications/' + currentUser).orderByChild('timestamp').limitToLast(50);
+  ref.once('value', function(snapshot) {
+    var notifs = [];
+    snapshot.forEach(function(child) {
+      notifs.push({ key: child.key, ...child.val() });
+    });
+    notifs.reverse();
+
+    if (notifs.length === 0) {
+      content.innerHTML = '<div class="notif-empty">\uD83D\uDD14<br>Keine Benachrichtigungen</div>';
+      return;
+    }
+
+    // Mark all as read
+    var updates = {};
+    notifs.forEach(function(n) {
+      if (!n.read) updates[n.key + '/read'] = true;
+    });
+    if (Object.keys(updates).length > 0) {
+      firebaseDB.ref('notifications/' + currentUser).update(updates);
+    }
+
+    var html = '<div class="notif-list">';
+    notifs.forEach(function(n) {
+      var avatar = n.sender === 'mitch' ? 'Mitch.png' : 'Fran.png';
+      var senderName = n.senderName || (n.sender === 'mitch' ? 'Mitch' : 'Fran');
+      var timeStr = n.timestamp ? timeAgo(n.timestamp) : '';
+
+      var text = '';
+      var onclick = '';
+      if (n.type === 'workout_done') {
+        text = '<strong>' + escapeHtml(senderName) + '</strong> hat <strong>' + escapeHtml(n.message || 'ein Training') + '</strong> abgeschlossen';
+        onclick = 'onclick="closeMoreMenu();showPage(\'Training\')"';
+      } else if (n.type === 'chat') {
+        text = '<strong>' + escapeHtml(senderName) + '</strong> hat dir geschrieben';
+        onclick = 'onclick="closeMoreMenu();showPage(\'Chat\')"';
+      } else if (n.type === 'note') {
+        text = '<strong>' + escapeHtml(senderName) + '</strong> hat eine Notiz bei <strong>' + escapeHtml(n.message || 'einer \u00DCbung') + '</strong> hinterlassen';
+        onclick = 'onclick="closeMoreMenu();showPage(\'Training\')"';
+      } else {
+        text = escapeHtml(n.message || 'Benachrichtigung');
+      }
+
+      html += '<div class="notif-item' + (!n.read ? ' notif-unread' : '') + '" ' + onclick + ' style="cursor:pointer;">' +
+        '<img class="notif-avatar" src="' + avatar + '" alt="' + escapeHtml(senderName) + '"/>' +
+        '<div class="notif-content">' +
+          '<div class="notif-text">' + text + '</div>' +
+          '<div class="notif-time">' + (n.icon || '') + ' ' + timeStr + '</div>' +
+        '</div>' +
+      '</div>';
+    });
+    html += '</div>';
+    content.innerHTML = html;
+  });
+}
+
+function timeAgo(ts) {
+  var diff = Date.now() - ts;
+  var mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'Gerade eben';
+  if (mins < 60) return 'Vor ' + mins + ' Min.';
+  var hours = Math.floor(mins / 60);
+  if (hours < 24) return 'Vor ' + hours + ' Std.';
+  var days = Math.floor(hours / 24);
+  if (days < 7) return 'Vor ' + days + ' Tag' + (days > 1 ? 'en' : '');
+  return new Date(ts).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
 }
 
 // ==================== PLAN BUILDER ====================
